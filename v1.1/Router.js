@@ -1,5 +1,6 @@
 Silo.Router = new function(){
     this.routes = [];
+    this.eventListeners = [];
 
     this.route = function(param){
         if(param === undefined){
@@ -12,7 +13,7 @@ Silo.Router = new function(){
 
     this.route.current = false;
 
-    this.route.on = function(e){
+    this.route.on = function(e,f){
         switch(e){
             case 'route':
 

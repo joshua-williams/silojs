@@ -10,5 +10,8 @@
         view.target(this.dom.find('header')[0]);
         view.render(this);
 
+        var footer = new Silo.View(this.path+'/views/footer.html');
+        footer.target(this.dom.find('footer')[0]);
+        footer.render(this);
     }
 })
