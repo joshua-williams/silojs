@@ -12,9 +12,7 @@
     The following demonstrates how to initiate a silo components:
 </p>
 <h4 style="margin:0px">Silo Component Configuration</h4>
-<xmp>
-<body silo="Demo"></body>
-</xmp>
+<xmp><body silo="Demo"></body></xmp>
 
 <p>
     Yes, it is that simple.<br>
@@ -26,10 +24,9 @@
     Controllers allow Silo Markup Language to access properties and methods of any javascript object.<br>
     Controllers bridge the gap between your javascript code and html markup.<br>
     A Silo Controller has two main properties; markup and object.<br>
-    The <strong>Silo Markup Language</strong> extends the silo namespace to html documents to expose all of it's features.
+    The <strong>Silo Markup Language</strong> (SML) extends the silo namespace to html documents to expose all of it's features.
 </p>
-<xmp>
-<body silo="Demo">
+<xmp><body silo="Demo">
     <silo:controller src="Navigation">
         <h1>{{title}}</h1>
     </silo:controller>
@@ -43,12 +40,11 @@
     <i>silo:include</i> and <i>silo:view</i>
     directives for loading external markup;
 </p>
-<xmp>
-<body>
+<xmp><body>
     <silo:include src="http://somedomain.com/resource.html"></silo:include>
 </body>
 </xmp>
-<p>Optionally, you can set the silo path as a base for view <sources></sources>.</p>
+<p>Optionally, you can set the silo path as a base for view source.</p>
 <xmp><body silo="Demo" src="./demo">
     <sio:view="getting-started.html"></sio:view>
 </body></xmp>
@@ -56,7 +52,7 @@
 <h3>Contained Silo Markup</h3>
 <p>
     Silo markup that live outside controllers and within a Silo Component<br>
-    Silo expression variables will test agains Silo.scope
+    Silo expression variables will test against Silo.scope
 </p>
 
 <h3>Global Silo Markup</h3>
@@ -64,14 +60,13 @@
     Silo markup not contained within silo objects.<br>
     Silo expression variables will test against the window object.
 </p>
-<xmp>
-    <body>
-        <script type="text/javascript">
-            var title = 'Silo Documentation';
-            var description = "Silojs bridges the gap between jsvascript and html";
-        </script>
+<xmp><body>
+    <script type="text/javascript">
+        var title = 'Silo Documentation';
+        var description = "Silojs bridges the gap between jsvascript and html";
+    </script>
 
-        <h1>{{title}}</h1>
-        <p>{{description}}</p>
-    </body>
+    <h1>{{title}}</h1>
+    <p>{{description}}</p>
+</body>
 </xmp>
