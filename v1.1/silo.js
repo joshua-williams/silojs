@@ -42,10 +42,35 @@ var Silo = new function(){
      * 3. Load views and includes
      */
     this.init = function(){
-        var silos = $dom('[silo]');
+        var silos = [];
+        if((siloTags = $dom('[silo]'))){
+            for(var a= 0, siloTag; siloTag=siloTags[a]; a++){
+                var directiveTags = siloTag.find('silo\\:controller,silo\\:include,silo\\:view');
+                if(!directiveTags) continue;
+                for(var b= 0, dt; dt=directiveTags[b]; b++){
+                    switch(dt.element.nodeName.toLowerCase()){
+                        case 'silo:include':
+                            console.log('is include');
+                            break;
+                        case 'silo:view': break;
+                        case 'silo:controller':
+                            this.initLoadControllers(siloTag);
+                            break;
+                    }
+                }
+            }
+        }
+        console.log(silos);
+        return this;
+        var silos = [];
         for(var a= 0, silo; silo=silos[a]; a++){
             var path = silo.attr('src') || './';
+            var tags = [];
+
+            console.log('silotags')
+            console.log(siloTags)
             if(!silo.attr('silo')){
+                //roadmap: possible function to render views without controllers
                 silo.remove();
                 continue;
             }
