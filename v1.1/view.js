@@ -115,6 +115,48 @@ Silo.View.renderEach = function(tag, html, vars){
     })(tag,html,vars);
 
 };
+/**
+ * @desc will render placeholders {{varName}} and return rendered value
+ * 	it can work like this too {{varName || methodName() || "alt string value if all else fails"}}
+ * 	if will try each segment until one returns true or false if non returns true
+ *  notice methods can be denoted with triling ().
+ *  String value must be enclosed in single or double quote
+ */
+Silo.View.placeholderValue = function(placeholder, vars, scope){
+    var value = (function(placeholder, vars, scope){
+        var expression = placeholder.replace(/^{{/,'').replace(/}}$/,'');
+        var match = expression.match(/^([\w.]+)(\(\))?/);
+        var subject = match[1]
+        var isFunction = match[2];
+        var value = null;
+        if(isFunction){
+            var func = getFrom(vars, subject);
+            value = (is_function(func)) ? func() : null;
+        }else{
+            value = getFrom(vars, subject);
+        }
+
+        if(value) return value;
+
+        var pattern = /\|\|\s([\w\s.'"!@#$%^&*\[\]()_+]+)/g;
+        while((match = pattern.exec(expression))){
+            var subject = match[1].trim();
+            if(subject.match(/\(\)$/)){
+                var func = getFrom(vars,subject.replace('()',''));
+                value = (is_function(func)) ? func() : null;
+            }else if((m = match[1].trim().match(/^'|"/))){
+                value = subject.replace(/^'|"/,'').replace(/'|"$/,'');
+            }else{
+                value = getFrom(vars, subject);
+            }
+            if(value) return value;
+        }
+        return value;
+        //var exp = placeholder.replace('{{','').replace('}}','');
+        //return exp;
+    })(placeholder, vars, scope);
+    return value;
+};
 
 Silo.View.replacePlaceholders = function(html, vars){
     var pattern = /{{([\w\s;:.,'"!|@#$%^&*()_+\-\[\]]+)}}/g;
@@ -126,4 +168,10 @@ Silo.View.replacePlaceholders = function(html, vars){
         }
     }
     return html;
+}
+
+Silo.View.renderElement = function(e){
+    if(!is_element(e)) return false;
+    var scope = Silo.scope(e);
+
 }

@@ -3,7 +3,7 @@ var isset = function(v, scope, _default) { var parts = v.split('.'); var scp = (
 var is_string = function(v){return (typeof(v)=='string')?true:false;}
 var is_array = function(v){return(Object.prototype.toString.call(v)=='[object Array]');}
 var is_object = function(v){return(Object.prototype.toString.call(v)=='[object Object]');}
-var is_element = function(v){return(Object.prototype.toString.call(v)=='[object HTMLElement]');}
+var is_element = function(v){return Object.prototype.toString.call(v).trim().match(/html(?:[a-z]+)?element/i);}
 var is_input = function(v){return(Object.prototype.toString.call(v)=='[object HTMLInputElement]');}
 var is_textarea = function(v){return(Object.prototype.toString.call(v)=='[object HTMLTextAreaElement]');}
 var is_select = function(v){return(Object.prototype.toString.call(v)=='[object HTMLSelectElement]');}

@@ -31,8 +31,23 @@ var Silo = new function(){
         }
     };
 
-    this.scope = function(n){
-        return getFrom(this.scope, n);
+    this.scope = function(dom){
+        if(is_string(dom)) return getFrom(Silo.scope, dom);
+        if(!is_element(dom)) return [];
+        var parent = dom.parentNode;
+        var scope = [];
+        while(parent){
+            if(!parent) break;
+
+            if(parent.nodeName.match(/silo/i)){
+                var className = parent.getAttribute('src');
+                if((cls = getFrom(Silo.scope, className))){
+                    setTo(scope, className, cls);
+                }
+            }
+            parent = parent.parentNode;
+        }
+        return scope;
     };
 
     /**
@@ -49,10 +64,9 @@ var Silo = new function(){
                 if(!directiveTags) continue;
                 for(var b= 0, dt; dt=directiveTags[b]; b++){
                     switch(dt.element.nodeName.toLowerCase()){
-                        case 'silo:include':
-                            console.log('is include');
+                        case 'silo:include': case 'silo:view':
+                            this.loadExternalSource(dt);
                             break;
-                        case 'silo:view': break;
                         case 'silo:controller':
                             this.initLoadControllers(siloTag);
                             break;
@@ -60,27 +74,13 @@ var Silo = new function(){
                 }
             }
         }
-        console.log(silos);
-        return this;
-        var silos = [];
-        for(var a= 0, silo; silo=silos[a]; a++){
-            var path = silo.attr('src') || './';
-            var tags = [];
 
-            console.log('silotags')
-            console.log(siloTags)
-            if(!silo.attr('silo')){
-                //roadmap: possible function to render views without controllers
-                silo.remove();
-                continue;
-            }
-            this.initLoadControllers(silo);
-        }
         (function(){
-            for(var a= 0, func; func=this.listeners[a]; a++){
+            for(var a= 0, func; func=Silo.listeners[a]; a++){
                 func();
             }
-        });
+        })();
+
     };
 
     this.loadController = function(ctrl, path){
@@ -100,10 +100,28 @@ var Silo = new function(){
                 controller.path = this.target.path;
                 if(is_function(controller.construct)){controller.construct(); }
                 setTo(Silo.scope, dom.attr('src'), controller);
-                Silo.loadViews(ctrl);
             }
         })
     };
+
+    this.loadExternalSource = function(dom){
+        (function(dom){
+            var nodeName = dom.element.nodeName.toLowerCase();
+            var src = dom.attr('src');
+            Silo.Loader.load({
+                url: src,
+                target: dom,
+                load: function(html) {
+                    var div = document.createElement('div');
+                    div.innerHTML = html;
+
+                    this.target.element.parentNode.insertBefore(div, this.element);
+                    Silo.View.renderElement(div);
+                }
+            })
+        })(dom);
+    };
+
 
     this.loadViews = function(ctrl){
         (function(ctrl){

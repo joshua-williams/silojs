@@ -20,15 +20,26 @@ Silo.Loader = new function(){
 
         var ajax = new XMLHttpRequest();
         ajax.target = param.target;
-        ajax.addEventListener('load', param.load);
-        ajax.addEventListener('error', param.error);
+        ajax.param = param;
+        ajax.addEventListener('load', function(){
+            if(this.statusText == 'OK'){
+                var callback = getFrom(this.param, 'load');
+                if(!callback || !is_function(callback)) return false;
+                callback.bind(this, this.responseText)();
+            }else{
+                var callback = getFrom(this.param, 'error');
+                if(!callback || !is_function(callback)) return false;
+                callback.bind(this, this.responseText)();
+            }
+        })
         ajax.addEventListener('abort', param.abort);
 
         ajax.open(param.method, param.url);
-       if(param.data){
-           ajax.send(param.data);
-       }else{
+
+        if(param.data){
+            ajax.send(param.data);
+        }else{
            ajax.send();
-       }
+        }
     };
 }();
