@@ -174,4 +174,5 @@ Silo.View.renderElement = function(e){
     if(!is_element(e)) return false;
     var scope = Silo.scope(e);
 
+
 }

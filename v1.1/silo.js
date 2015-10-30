@@ -63,6 +63,7 @@ var Silo = new function(){
                 var directiveTags = siloTag.find('silo\\:controller,silo\\:include,silo\\:view');
                 if(!directiveTags) continue;
                 for(var b= 0, dt; dt=directiveTags[b]; b++){
+                    dt.silo = siloTag;
                     switch(dt.element.nodeName.toLowerCase()){
                         case 'silo:include': case 'silo:view':
                             this.loadExternalSource(dt);
@@ -108,6 +109,13 @@ var Silo = new function(){
         (function(dom){
             var nodeName = dom.element.nodeName.toLowerCase();
             var src = dom.attr('src');
+            var type = (nodeName == 'silo:view') ? 'view': 'include';
+            switch(nodeName){
+                case 'silo:view':
+                    src = (dom.silo.attr('src')) ? dom.silo.attr('src') + '/views/' + src : src;
+                    break;
+                case 'silo:include': break;
+            }
             Silo.Loader.load({
                 url: src,
                 target: dom,
@@ -117,6 +125,10 @@ var Silo = new function(){
 
                     this.target.element.parentNode.insertBefore(div, this.element);
                     Silo.View.renderElement(div);
+                },
+                error: function(){
+                    console.log('failed to load');
+                    console.log(this.target)
                 }
             })
         })(dom);
