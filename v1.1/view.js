@@ -158,7 +158,7 @@ Silo.View.placeholderValue = function(placeholder, vars, scope){
     return value;
 };
 
-Silo.View.replacePlaceholders = function(html, vars){
+Silo.View.replacePlaceholdersBak = function(html, vars){
     var pattern = /{{([\w\s;:.,'"!|@#$%^&*()_+\-\[\]]+)}}/g;
     if((match = html.match(pattern))){
         for(var a=0, placeholder; placeholder=match[a]; a++){
@@ -169,10 +169,111 @@ Silo.View.replacePlaceholders = function(html, vars){
     }
     return html;
 }
+Silo.View.load = function(element){
+    (function(element){
+        dom = $dom(element);
+        var nodeName = dom.element.nodeName.toLowerCase();
+        var src = dom.attr('src');
+        switch(nodeName){
+            case 'silo:view':
+                var scope = Silo.scope(element);
+                if((silo = $dom(Silo.getSilo(element)))){
+                    src = (silo.attr('src')) ? silo.attr('src') + '/views/' + src : src;
+                }
+                break;
+            case 'silo:include': break;
+        }
 
-Silo.View.renderElement = function(e){
-    if(!is_element(e)) return false;
-    var scope = Silo.scope(e);
+        Silo.Loader.load({
+            url: src,
+            target: dom,
+            load: function(html) {
+                var div = document.createElement('div');
+                div.innerHTML = html;
+
+                this.target.element.parentNode.insertBefore(div, this.element);
+                Silo.View.renderElement(div);
+                this.target.element.parentNode.removeChild(this.target.element);
+            },
+            error: function(){
+                console.log('Silo Error: Failed to load view ' + this.responseURL);
+            }
+        })
+    })(element);
+};
+
+Silo.View.renderElement = function(element){
+    if(!is_element(element)) return false;
+    var scope = Silo.scope(element);
+    var directiveTags = $dom(element).find('silo\\:controller,silo\\:include,silo\\:view, silo\\:if, silo\\:each');
+    for(var b= 0, dt; dt=directiveTags[b]; b++){
+        //dt.silo = siloTag;
+        switch(dt.element.nodeName.toLowerCase()){
+            case 'silo:include': case 'silo:view': this.load(dt.element); break;
+            case 'silo:controller':
+                Silo.loadController(dt);
+                /**
+                 * render this element again when the controller loads so that
+                 * the dependency is loaded for the rest of the script following
+                 *
+                 */
+                
+                return false;
+                break;
+            case 'silo:if':
+                this.renderIf(dt.element);
+                break;
+            case 'silo:each':
+
+                break;
+        }
+    }
+}
+
+Silo.View.renderIf = function(element){
+    var scope = Silo.scope(element,1);
+
+    var attrs = element.attributes;
+
+    if(!attrs.length) return false;
+
+    if(attrs.length === 1){
+        var subject = attrs[0].nodeName;
+        var value = attrs[0].nodeValue;
+        if(value === ''){
+            /**
+             * this will render experssions such as:
+             * <silo:if subject></silo:if>
+             */
+           // console.log(subject)
+            scope.each(function(){
+                var  s = getFrom(Silo.scope, this.className);
+                console.log(this.className);
+                console.log(getFrom(Silo.scope, 'Controller.Main'))
+                console.log(s)
+            })
+        }else{
+            /**
+             * this will render expressions such as:
+             * <silo:if subject="test subject">
+             */
+        }
+    }
+    if(value === ''){
 
 
+    }
+}
+/**
+ *
+ * @param html[string] the string to be rendered
+ * @desc will parse placeholder {{variables}} and {{expressions || functions()||
+ */
+Silo.View.replacePlaceholders = function(html, scope){
+    var pattern = /{{([\w\s;:.,'"!|@#$%^&*()_+\-\[\]]+)}}/g;
+    console.log(typeof(html))
+    return;
+    if((match = html.match(pattern))){
+        console.log(match);
+    }
 }

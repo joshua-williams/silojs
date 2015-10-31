@@ -31,48 +31,49 @@ var Silo = new function(){
         }
     };
 
-    this.scope = function(dom){
-        if(is_string(dom)) return getFrom(Silo.scope, dom);
-        if(!is_element(dom)) return [];
-        var parent = dom.parentNode;
-        var scope = [];
-        while(parent){
-            if(!parent) break;
+    this.scope = function(dom,debug){
 
-            if(parent.nodeName.match(/silo/i)){
-                var className = parent.getAttribute('src');
-                if((cls = getFrom(Silo.scope, className))){
-                    setTo(scope, className, cls);
+        if(is_string(dom)) return getFrom(Silo.scope, dom);
+        if(is_element(dom)){
+
+            var parent = dom.parentNode;
+            var scope = [];
+            while(parent){
+                if(!parent) break;
+
+                if(parent.nodeName.match(/silo/i)){
+                    if(parent.nodeName.toLowerCase() == 'silo:controller'){
+                        scope.push(parent);
+                    }
+                }
+                parent = parent.parentNode;
+            }
+            scope.each = function(func){
+                if(!is_function(func)) return;
+                for(var a = 0, i; i = this[a]; a++){
+                    this[a].className = this[a].getAttribute('src')
+                    func.bind(this[a])();
                 }
             }
-            parent = parent.parentNode;
+            return scope;
+        }else{
+            return [];
         }
-        return scope;
     };
 
-    /**
-     * @desc
-     * 1. Load Silos
-     * 2. Load and instantiate Controllers
-     * 3. Load views and includes
-     */
+    this.getSilo = function(element){
+        while(element.parentNode){
+            element = element.parentNode;
+            if(!element.hasAttribute('silo')) continue;
+            return element;
+        }
+    }
+
     this.init = function(){
         var silos = [];
         if((siloTags = $dom('[silo]'))){
             for(var a= 0, siloTag; siloTag=siloTags[a]; a++){
-                var directiveTags = siloTag.find('silo\\:controller,silo\\:include,silo\\:view');
-                if(!directiveTags) continue;
-                for(var b= 0, dt; dt=directiveTags[b]; b++){
-                    dt.silo = siloTag;
-                    switch(dt.element.nodeName.toLowerCase()){
-                        case 'silo:include': case 'silo:view':
-                            this.loadExternalSource(dt);
-                            break;
-                        case 'silo:controller':
-                            this.initLoadControllers(siloTag);
-                            break;
-                    }
-                }
+                Silo.View.renderElement(siloTag.element);
             }
         }
 
@@ -84,7 +85,50 @@ var Silo = new function(){
 
     };
 
-    this.loadController = function(ctrl, path){
+    this.loadController = function(ctrl){
+        if(is_string(ctrl)){
+
+        }else if(is_object(ctrl)){
+            if(is_element(ctrl.element)){
+                var dom = $dom(ctrl.element);
+            }else if(is_element(ctrl)){
+                var dom = $dom(ctrl);
+            }else{
+                return false;
+            }
+            if((silo = Silo.getSilo(dom.element))){
+                var path = $dom(silo).attr('src') || '.';
+            }else{
+                var path = '.';
+            }
+            var src = dom.attr('src').replace('.', '/') + '.js';
+            var url = path + '/' + src;
+            Silo.Loader.load({
+                url: url,
+                target: {dom:dom},
+                load: Silo.onLoadController,
+                error: Silo.onErrorController
+            })
+
+        }
+    };
+
+    this.onLoadController = function(script){
+        var className = this.target.dom.attr('src');
+        try{
+            eval('var ctrl = new ' + script);
+            setTo(Silo.scope, className, ctrl);
+            console.log('______controller loaded__________' + className)
+        }catch(e){
+            console.log('Silo Controller Error on '+className+'\nError Message: ' + e.message+'\n')
+        }
+
+    };
+    this.onErrorController = function(){
+        console.log('controller failed to load');
+    };
+
+    this.loadControllerBak = function(ctrl, path){
         if (!(src = ctrl.attr('src'))) {
             ctrl.remove();
             return;
@@ -105,63 +149,6 @@ var Silo = new function(){
         })
     };
 
-    this.loadExternalSource = function(dom){
-        (function(dom){
-            var nodeName = dom.element.nodeName.toLowerCase();
-            var src = dom.attr('src');
-            var type = (nodeName == 'silo:view') ? 'view': 'include';
-            switch(nodeName){
-                case 'silo:view':
-                    src = (dom.silo.attr('src')) ? dom.silo.attr('src') + '/views/' + src : src;
-                    break;
-                case 'silo:include': break;
-            }
-            Silo.Loader.load({
-                url: src,
-                target: dom,
-                load: function(html) {
-                    var div = document.createElement('div');
-                    div.innerHTML = html;
-
-                    this.target.element.parentNode.insertBefore(div, this.element);
-                    Silo.View.renderElement(div);
-                },
-                error: function(){
-                    console.log('failed to load');
-                    console.log(this.target)
-                }
-            })
-        })(dom);
-    };
-
-
-    this.loadViews = function(ctrl){
-        (function(ctrl){
-            if(!(views = ctrl.find('silo\\:view, silo\\:include'))){ return false;}
-            for(var a= 0, view; view=views[a]; a++){
-                if(view.element.nodeName.match(/silo:view/i)){
-                    var src = ctrl.path + '/views/' + view.attr('src');
-                }else{
-                    var src = view.attr('src');
-                }
-                Silo.Loader.load({
-                    url: src,
-                    target: {view:view},
-                    load: function(r){
-                        if(this.statusText !== 'OK'){
-                           return this.target.view.remove();
-                        }
-
-                        this.target.view.replaceWith(this.responseText)
-                       // console.log('load successful');
-                       // console.log(this.target.view.attr('src'));
-                    }
-                })
-            }
-
-        })(ctrl);
-    }
-
     this.initLoadControllers = function(silo){
         (function(silo){
             var path = silo.attr('src') || '.';
@@ -172,7 +159,8 @@ var Silo = new function(){
 
             }
         })(silo);
-    }
+    };
+
     window.addEventListener('load', function(){
         Silo.init();
     });
