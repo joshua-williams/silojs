@@ -34,50 +34,8 @@ Silo.View = function(param){
     })(param);
 }
 
-/**
- * @desc will render placeholders {{varName}} and return rendered value
- * 	it can work like this too {{varName || methodName() || "alt string value if all else fails"}}
- * 	if will try each segment until one returns true or false if non returns true
- *  notice methods can be denoted with triling ().
- *  String value must be enclosed in single or double quote
- */
-Silo.View.placeholderValue = function(placeholder, vars, scope){
-    var value = (function(placeholder, vars, scope){
-        var expression = placeholder.replace(/^{{/,'').replace(/}}$/,'');
-        var match = expression.match(/^([\w.]+)(\(\))?/);
-        var subject = match[1]
-        var isFunction = match[2];
-        var value = null;
-        if(isFunction){
-            var func = getFrom(vars, subject);
-            value = (is_function(func)) ? func() : null;
-        }else{
-            value = getFrom(vars, subject);
-        }
 
-        if(value) return value;
-
-        var pattern = /\|\|\s([\w\s.'"!@#$%^&*\[\]()_+]+)/g;
-        while((match = pattern.exec(expression))){
-            var subject = match[1].trim();
-            if(subject.match(/\(\)$/)){
-                var func = getFrom(vars,subject.replace('()',''));
-                value = (is_function(func)) ? func() : null;
-            }else if((m = match[1].trim().match(/^'|"/))){
-                value = subject.replace(/^'|"/,'').replace(/'|"$/,'');
-            }else{
-                value = getFrom(vars, subject);
-            }
-            if(value) return value;
-        }
-        return value;
-        //var exp = placeholder.replace('{{','').replace('}}','');
-        //return exp;
-    })(placeholder, vars, scope);
-    return value;
-};
-
-Silo.View.renderEach = function(tag, html, vars){
+Silo.View.renderEachBak = function(tag, html, vars){
     return (function(tag,html,vars){
         var subject = tag.open.seg(0).key;
         var collection = getFrom(vars, subject);
@@ -230,7 +188,7 @@ Silo.View.renderElement = function(element, reload){
                 return this.renderElement(element);
 
             case 'silo:each':
-
+                this.renderEach(dt.element);
                 break;
         }
     }
@@ -275,17 +233,166 @@ Silo.View.renderIf = function(element){
 
 
     }
+};
+
+Silo.View.renderEach = function(element){
+    var scope = Silo.scope(element);
+    var dom = $dom(element);
+    var atts = element.attributes;
+    var alias = (dom.attr('as')) ? dom.attr('as') : 'item';
+    var markup = dom.html();
+    var key = (dom.attr('key')) ? dom.attr('key') : 'key';
+    if(!atts.length) return false;
+    var collection = false;;
+    scope.each(function(){
+        var cltn =  getFrom(Silo.scope, this.className + '.' + atts[0].nodeName);
+        if(cltn === null) return true;        // return true to continue Silo.scope.each loop
+        collection = cltn;
+        return false;                          // return false to stop Wilo.scope.each loop
+    });
+
+    if(!is_array(collection)) return false;
+
+    for(k in collection){
+
+        var _scope = scope.slice(0);
+        _scope.each = scope.each;
+        var arrayElement = [];
+        arrayElement[key] = k
+        arrayElement[alias] = collection[k];
+        _scope.unshift(arrayElement);
+        this.renderExpressions(markup, _scope);
+    }
+
+    console.log(scope)
+}
+
+Silo.View.getFromScope = function (variable, scope){
+    return (function(){
+        var value = null;
+        scope.each(function(){
+            if(is_element(this)){
+                value = getFrom(Silo.scope, this.className + '.' + variable);
+                if(value === null) return true;  // continue scope each loop
+                return false; // break scope each loop
+            }else{
+                value = getFrom(this, variable);
+                if(value === null) return true;
+                return false;
+            }
+        });
+        return value;
+    })(variable, scope);
+};
+
+Silo.View.expressionValue = function(expression, scope){
+    expression = expression.replace(/^{{/, '').replace(/}}$/, '');
+    var segments = expression.split(' ');
+    (function(segments, scope){
+        var currentValue = null;
+        var operator = false;
+
+        for(var a= 0, segment; segment = segments[a]; a++){
+            switch(segment){
+                case '||': operator = '||'; break;
+                default:
+
+                    if(segment.match(/^('|")/ || segment.match(/('|")$/))){
+                        /**
+                         * parses string segment enclosed by single or double quotes
+                         */
+                        segment = segment.replace(/^('|")/,'').replace(/('|")$/, '');
+                        console.log('its good')
+                        break;
+
+                    }else if((match = segment.match(/([a-z][a-z0-9_\-\.]+)\(\)$/i))){
+                        /**
+                         * parse functions
+                         */
+                       console.log('found function')
+                    }
+                    continue;
+
+                    if(segment.match(/^('|")/ || segment.match(/('|")$/))){
+                        segment = segment.replace(/^('|")/,'').replace(/('|")$/, '');
+                        return false;
+                        break;
+                    }else if((match = segment.match(/([a-z][a-z0-9_\-\.]+)\(\)$/i))){
+                        var func = Silo.View.getFromScope(match[1], scope);
+                        console.log(func)
+                        return false;
+                    }else{
+                        return false;
+                        currentValue = Silo.View.getFromScope(segment, scope);
+                    }
+
+                    //console.log(segment+' = ' +currentValue);
+            }
+        }
+    })(segments, scope);
 }
 /**
  *
  * @param html[string] the string to be rendered
  * @desc will parse placeholder {{variables}} and {{expressions || functions()||
  */
-Silo.View.replacePlaceholders = function(html, scope){
+Silo.View.renderExpressions = function(html, scope){
     var pattern = /{{([\w\s;:.,'"!|@#$%^&*()_+\-\[\]]+)}}/g;
-    console.log(typeof(html))
-    return;
-    if((match = html.match(pattern))){
-        console.log(match);
+    var match = html.match(pattern);
+    if(!match) return false;
+    for(var a= 0, expression; expression = match[a]; a++){
+        var expressionValue = this.expressionValue(expression, scope);
     }
+    /*if((match = html.match(pattern))){
+        for(var a=0, expression; expression=match[a]; a++){
+            var expressionValue = (function(expression, scope){
+                console.log(match)
+                return Silo.View.expressionValue(expression, scope);
+            })(expression, scope);
+        }
+    }*/
+    return html;
 }
+
+/**
+ * @desc will render placeholders {{varName}} and return rendered value
+ * 	it can work like this too {{varName || methodName() || "alt string value if all else fails"}}
+ * 	if will try each segment until one returns true or false if non returns true
+ *  notice methods can be denoted with triling ().
+ *  String value must be enclosed in single or double quote
+ */
+Silo.View.placeholderValue = function(placeholder, vars, scope){
+    var value = (function(placeholder, vars, scope){
+        var expression = placeholder.replace(/^{{/,'').replace(/}}$/,'');
+        var match = expression.match(/^([\w.]+)(\(\))?/);
+        var subject = match[1]
+        var isFunction = match[2];
+        var value = null;
+        if(isFunction){
+            var func = getFrom(vars, subject);
+            value = (is_function(func)) ? func() : null;
+        }else{
+            value = getFrom(vars, subject);
+        }
+
+        if(value) return value;
+
+        var pattern = /\|\|\s([\w\s.'"!@#$%^&*\[\]()_+]+)/g;
+        while((match = pattern.exec(expression))){
+            var subject = match[1].trim();
+            if(subject.match(/\(\)$/)){
+                var func = getFrom(vars,subject.replace('()',''));
+                value = (is_function(func)) ? func() : null;
+            }else if((m = match[1].trim().match(/^'|"/))){
+                value = subject.replace(/^'|"/,'').replace(/'|"$/,'');
+            }else{
+                value = getFrom(vars, subject);
+            }
+            if(value) return value;
+        }
+        return value;
+        //var exp = placeholder.replace('{{','').replace('}}','');
+        //return exp;
+    })(placeholder, vars, scope);
+    return value;
+};

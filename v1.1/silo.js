@@ -50,9 +50,13 @@ var Silo = new function(){
             }
             scope.each = function(func){
                 if(!is_function(func)) return;
+
                 for(var a = 0, i; i = this[a]; a++){
-                    this[a].className = this[a].getAttribute('src')
-                    func.bind(this[a])();
+                    if(is_element(this[a])){
+                        this[a].className = this[a].getAttribute('src');
+                    }
+
+                    if(func.bind(this[a])() === false) break;
                 }
             }
             return scope;
@@ -115,13 +119,9 @@ var Silo = new function(){
 
     this.onLoadController = function(script){
         var className = this.target.dom.attr('src');
-        try{
-            eval('var ctrl = new ' + script);
-            setTo(Silo.scope, className, ctrl);
-            Silo.View.renderElement(this.target.dom.element, 'controller');
-        }catch(e){
-            console.log('Silo Controller Error on '+className+'\nError Message: ' + e.message+'\n')
-        }
+        eval('var ctrl = new ' + script);
+        setTo(Silo.scope, className, ctrl);
+        Silo.View.renderElement(this.target.dom.element, 'controller');
 
     };
     this.onErrorController = function(){
