@@ -44,14 +44,16 @@ var $dom = function(v, asDom, parent) {
 
         this.replaceWith = function(v){
             if(is_string(v)){
-                (function(html, dom){
+                return (function(html, dom){
                     var div = document.createElement('div');
                     div.innerHTML = v;
                     dom.element.parentNode.insertBefore(div, dom.element);
                     dom.element.remove();
+                    return div;
                 })(v,this)
             }else if(is_element(v)){
-                this.element.parentNode.insertBefore(v, this.element);
+                this.element.parentNode.insertBefore(v, this.element)
+                return v;
             }
         };
         this.remove = function(){this.element.parentNode.removeChild(this.element);}

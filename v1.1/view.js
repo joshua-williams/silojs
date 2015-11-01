@@ -35,98 +35,7 @@ Silo.View = function(param){
 }
 
 
-Silo.View.renderEachBak = function(tag, html, vars){
-    return (function(tag,html,vars){
-        var subject = tag.open.seg(0).key;
-        var collection = getFrom(vars, subject);
 
-        if(!is_array(collection) && !is_object(collection)){
-            console.log("Silo Error: Invalid each source in " + subject);
-            return this.htmlDeleteTag(tag, html);
-        }
-
-        var alias = tag.open.seg(2).key;
-        var key = tag.open.attr('key');
-        var tags = this.matchTags(html);
-        var content = html.substring(tag.open.index + tag.open.html.length, tag.close.index);
-        var markup = (function(collection, alias, vars, html, tags, view){
-            var markup = '';
-
-            vars.iteration = 0;
-            for(key in collection){
-                var _markup = html;
-                vars[alias||'item'] = collection[key]
-                var pattern = /{{([\w\s;:.,'"!|@#$%^&*()_+\-\[\]]+)}}/g;
-                if((match = _markup.match(pattern))){
-                    for(var a=0, placeholder; placeholder=match[a]; a++){
-                        _markup = _markup.replace(placeholder, view.placeholderValue(placeholder, vars));
-                    }
-                }
-                markup+=_markup;
-                vars.iteration++;
-            }
-            return markup
-        })(collection, alias, vars, content, tags, this);
-        html = html.substring(0, tag.open.index) + markup + html.substring(tag.close.index + tag.close.html.length);
-        return html;
-
-    })(tag,html,vars);
-
-};
-/**
- * @desc will render placeholders {{varName}} and return rendered value
- * 	it can work like this too {{varName || methodName() || "alt string value if all else fails"}}
- * 	if will try each segment until one returns true or false if non returns true
- *  notice methods can be denoted with triling ().
- *  String value must be enclosed in single or double quote
- */
-Silo.View.placeholderValue = function(placeholder, vars, scope){
-    var value = (function(placeholder, vars, scope){
-        var expression = placeholder.replace(/^{{/,'').replace(/}}$/,'');
-        var match = expression.match(/^([\w.]+)(\(\))?/);
-        var subject = match[1]
-        var isFunction = match[2];
-        var value = null;
-        if(isFunction){
-            var func = getFrom(vars, subject);
-            value = (is_function(func)) ? func() : null;
-        }else{
-            value = getFrom(vars, subject);
-        }
-
-        if(value) return value;
-
-        var pattern = /\|\|\s([\w\s.'"!@#$%^&*\[\]()_+]+)/g;
-        while((match = pattern.exec(expression))){
-            var subject = match[1].trim();
-            if(subject.match(/\(\)$/)){
-                var func = getFrom(vars,subject.replace('()',''));
-                value = (is_function(func)) ? func() : null;
-            }else if((m = match[1].trim().match(/^'|"/))){
-                value = subject.replace(/^'|"/,'').replace(/'|"$/,'');
-            }else{
-                value = getFrom(vars, subject);
-            }
-            if(value) return value;
-        }
-        return value;
-        //var exp = placeholder.replace('{{','').replace('}}','');
-        //return exp;
-    })(placeholder, vars, scope);
-    return value;
-};
-
-Silo.View.replacePlaceholdersBak = function(html, vars){
-    var pattern = /{{([\w\s;:.,'"!|@#$%^&*()_+\-\[\]]+)}}/g;
-    if((match = html.match(pattern))){
-        for(var a=0, placeholder; placeholder=match[a]; a++){
-            var value = this.placeholderValue(placeholder, vars);
-            value = (value) ? value : '';
-            html = html.replace(placeholder, value);
-        }
-    }
-    return html;
-}
 Silo.View.load = function(element){
     (function(element){
         dom = $dom(element);
@@ -185,8 +94,11 @@ Silo.View.renderElement = function(element, reload){
                 return this.renderElement(element);
 
             case 'silo:each':
-                this.renderEach(dt.element);
-                return false;
+                var el = this.renderEach(dt.element);
+                if(el === null){
+                    $dom(element).remove();
+                }
+                return this.renderElement(element);
                 break;
         }
     }
@@ -234,41 +146,43 @@ Silo.View.renderIf = function(element){
 };
 
 Silo.View.renderEach = function(element){
-    var scope = Silo.scope(element);
-    var dom = $dom(element);
-    var atts = element.attributes;
-    var alias = (dom.attr('as')) ? dom.attr('as') : 'item';
-    var markup = dom.html();
-    var key = (dom.attr('key')) ? dom.attr('key') : 'key';
-    if(!atts.length) return false;
-    var collection = false;
-    scope.each(function(){
-        var cltn =  getFrom(Silo.scope, this.className + '.' + atts[0].nodeName);
-        if(cltn === null) return true;        // return true to continue Silo.scope.each loop
-        collection = cltn;
-        return false;                          // return false to stop Wilo.scope.each loop
-    });
+    return (function(element){
+        var scope = Silo.scope(element);
+        var dom = $dom(element);
+        var atts = element.attributes;
+        var alias = (dom.attr('as')) ? dom.attr('as') : 'item';
+        var markup = dom.html();
+        var key = (dom.attr('key')) ? dom.attr('key') : 'key';
+        if(!atts.length) return null;
+        var collection = false;
+        scope.each(function(){
+            var cltn =  getFrom(Silo.scope, this.className + '.' + atts[0].nodeName);
+            if(cltn === null) return true;        // return true to continue Silo.scope.each loop
+            collection = cltn;
+            return false;                          // return false to stop Wilo.scope.each loop
+        });
 
-    if(!is_array(collection)) return false;
-    var html = '';
+        if(!is_array(collection)) return null;
+        var html = '';
 
-    for(k in collection){
-
-        var _scope = scope.slice(0);
-        _scope.each = scope.each;
-        var arrayElement = [];
-        arrayElement[key] = k
-        arrayElement[alias] = collection[k];
-        _scope.unshift(arrayElement);
-        var _html = this.renderExpressions(markup, _scope);
-        if(_html === null){
-            console.log('Silo Expression Error around: ' + markup);
-            continue;
+        for(k in collection){
+            var _scope = scope.slice(0);
+            _scope.each = scope.each;
+            var arrayElement = [];
+            arrayElement[key] = k
+            arrayElement[alias] = collection[k];
+            _scope.unshift(arrayElement);
+            var _html = Silo.View.renderExpressions(markup, _scope);
+            if(_html === null){
+                console.log('Silo Expression Error around: ' + markup);
+                continue;
+            }
+            html += _html;
+            //html+= this.renderExpressions(markup, _scope);
         }
-        html += _html;
-        //html+= this.renderExpressions(markup, _scope);
-    }
-    dom.replaceWith(html)
+        return dom.replaceWith(html);
+    })(element);
+
 }
 
 Silo.View.getFromScope = function (variable, scope){
@@ -366,46 +280,3 @@ Silo.View.renderExpressions = function(html, scope){
         return html;
     })(html, scope);
 }
-
-/**
- * @desc will render placeholders {{varName}} and return rendered value
- * 	it can work like this too {{varName || methodName() || "alt string value if all else fails"}}
- * 	if will try each segment until one returns true or false if non returns true
- *  notice methods can be denoted with triling ().
- *  String value must be enclosed in single or double quote
- */
-Silo.View.placeholderValue = function(placeholder, vars, scope){
-    var value = (function(placeholder, vars, scope){
-        var expression = placeholder.replace(/^{{/,'').replace(/}}$/,'');
-        var match = expression.match(/^([\w.]+)(\(\))?/);
-        var subject = match[1]
-        var isFunction = match[2];
-        var value = null;
-        if(isFunction){
-            var func = getFrom(vars, subject);
-            value = (is_function(func)) ? func() : null;
-        }else{
-            value = getFrom(vars, subject);
-        }
-
-        if(value) return value;
-
-        var pattern = /\|\|\s([\w\s.'"!@#$%^&*\[\]()_+]+)/g;
-        while((match = pattern.exec(expression))){
-            var subject = match[1].trim();
-            if(subject.match(/\(\)$/)){
-                var func = getFrom(vars,subject.replace('()',''));
-                value = (is_function(func)) ? func() : null;
-            }else if((m = match[1].trim().match(/^'|"/))){
-                value = subject.replace(/^'|"/,'').replace(/'|"$/,'');
-            }else{
-                value = getFrom(vars, subject);
-            }
-            if(value) return value;
-        }
-        return value;
-        //var exp = placeholder.replace('{{','').replace('}}','');
-        //return exp;
-    })(placeholder, vars, scope);
-    return value;
-};

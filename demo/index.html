@@ -5,17 +5,47 @@
         <meta name="viewport" content="initial-scale=1, width=device-width">
         <title>Silo Documentation</title>
         <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+        <link href="https://fonts.googleapis.com/css?family=Handlee|Calligraffitti|Open+Sans+Condensed:300|Alegreya+Sans|PT+Sans+Caption" rel="stylesheet" type="text/css">
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.js"></script>
         <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
         <script type="text/javascript" src="../v1.1/silo.js"></script>
         <style>
             body{  background:#f1f1f1; }
+            nav{border-bottom: thin #e0e0e0 solid;position:relative;}
+            nav:before{
+                content: ' ';
+                display:block;
+                //position: absolute;
+                border-bottom: 1px black solid;
+                width: 100%;
+            }
             nav .nav > li{float:left;}
+            .banner {
+                background-color: #337ab7;
+                color: #fff;
+            }
+            .banner .inner {
+                text-align: center;
+                padding: 20px;
+                font-size: 65px;
+            }
+            a.logo, a.logo:hover, a.logo:active {
+                font-family: 'Handlee', cursive;
+                text-decoration: none;
+                text-shadow: 1px 1px black;
+                color: #fcfcfc;
+            }
         </style>
     </head>
 
 
     <body>
+        <div class="banner">
+            <div class="inner">
+                <a class="logo" href="http://silojs.com">Silo<span>Js</span></a>
+                <span style="line-height:20px;display:block;font-size:20px">Javascript Framework</span>
+            </div>
+        </div>
         <div silo="Index" src="./silos">
             <silo:view src="menu/main.html"></silo:view>
 
