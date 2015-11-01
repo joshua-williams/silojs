@@ -35,6 +35,7 @@
                 text-shadow: 1px 1px black;
                 color: #fcfcfc;
             }
+            section{padding: 20px;}
         </style>
     </head>
 
@@ -47,12 +48,12 @@
             </div>
         </div>
         <div silo="Index" src="./silos">
-            <silo:view src="menu/main.html"></silo:view>
+            <silo:view src="menu/main-menu.html"></silo:view>
 
             <silo:controller src="Controller.Index">
                 <header></header>
                 <section>
-                    <silo:view id="toc" render="false" src="table-of-content.html"></silo:view>
+                    <silo:view id="toc" render="false" src="order-of-operation.html"></silo:view>
                 </section>
                 <footer></footer>
             </silo:controller>

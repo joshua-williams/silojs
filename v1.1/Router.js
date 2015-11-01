@@ -3,11 +3,9 @@ Silo.Router = new function(){
     this.eventListeners = [];
 
     this.route = function(param){
-        if(param === undefined){
-            return this.route.current;
-        }
-        param = (is_object(param)) ? param : {};
-        if(!param.hash  || !is_string(param.hash) || !param.controller || !is_string(param.controller)){return false;}
+        if(!is_object(param)) return false;
+        if(!is_string(param.hash)) return false;
+        if(!is_function(param.callback)) return false;
         this.routes.push(param);
     };
 
@@ -29,10 +27,15 @@ Silo.Router = new function(){
         (function(that){
             for(var a= 0, route; route=that.routes[a]; a++){
                 if(route.hash === window.location.hash.replace('#','')){
-                    if(ctrl = getFrom(Silo.scope, route.controller)){
-                        console.log('found route controller')
-                        console.log(ctrl)
+                    var scope = false;
+                    if(!is_function(route.callback)) continue;
+                    if(is_string(route.controller)){
+                        var ctrl = getFrom(Silo.scope, route.controller);
+                        if(is_object(ctrl)){
+                            scope = ctrl;
+                        }
                     }
+                    route.callback.bind((scope||route))()
                 }
             }
         })(this);

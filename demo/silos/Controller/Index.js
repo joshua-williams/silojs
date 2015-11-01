@@ -1,12 +1,22 @@
 (function(){
 
     this.construct = function(){
-        console.log('Index controller loaded');
-        //Silo.Router.on('route')
         this.loadViews();
+        Silo.Router.route({
+            hash: 'docs/order-of-operation',
+            callback: this.orderOfOperation,
+            controller: 'Controller.Index'
+        });
+    };
+
+    this.orderOfOperation = function(){
+
+        var view = new Silo.View(this.path + '/views/order-of-operation.html');
+
     };
 
     this.loadViews = function(){
+
         var view = new Silo.View(this.path + '/views/header.html');
         view.target(this.dom.find('header')[0]);
         view.render(this);

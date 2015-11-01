@@ -140,10 +140,6 @@ Silo.View.renderIf = function(element){
         }
         return condition;
     }
-    if(value === ''){
-
-
-    }
 };
 
 Silo.View.renderEach = function(element){

@@ -120,9 +120,14 @@ var Silo = new function(){
     this.onLoadController = function(script){
         var className = this.target.dom.attr('src');
         eval('var ctrl = new ' + script);
+        ctrl.dom = this.target.dom;
+        var silo = $dom(Silo.getSilo(ctrl.dom.element));
+        ctrl.path = (silo.attr('src')) ? silo.attr('src') : '.';
         setTo(Silo.scope, className, ctrl);
         Silo.View.renderElement(this.target.dom.element, 'controller');
-
+        if(is_function(ctrl.construct)){
+            ctrl.construct();
+        }
     };
     this.onErrorController = function(){
         console.log('controller failed to load');

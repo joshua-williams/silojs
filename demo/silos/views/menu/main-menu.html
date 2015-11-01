@@ -1,0 +1,32 @@
+<style>
+    .nav.main > li{float:left;}
+    .nav.main > li.dropdown.open li:hover > .dropdown-menu{
+        display: block;
+        position: absolute;
+        top: -3px;
+        left: 173px;
+        border-radius: 0px;
+    }
+</style>
+<ul class="nav main">
+    <li><a href="#">Home</a></li>
+    <li class="dropdown">
+        <a data-toggle="dropdown" href="#docs">Documentation</a>
+        <ul class="dropdown-menu">
+            <li><a href="#docs/introdution">Introduction to Silojs</a></li>
+            <li><a href="#docs/getting-started">Getting Started</a></li>
+            <li><a href="#docs/demo">Silojs Examples</a></li>
+            <li><a href="#docs/order-of-operation">Order of Operation</a></li>
+            <li><a href="#docs/scope">Silo Template Engine</a></li>
+            <li class="dropdown">
+                <a data-toggle="dropdown" href="#" class="dropdown">Reference Guide</a>
+                <ul class="dropdown-menu">
+                    <li><a href="#docs/reference/Controller">Controller</a></li>
+                    <li><a href="#docs/reference/Controller">View</a></li>
+                    <li><a href="#docs/reference/Controller">Router</a></li>
+                </ul>
+            </li>
+        </ul>
+    </li>
+</ul>
+<div class="clearfix"></div>
