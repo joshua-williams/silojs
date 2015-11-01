@@ -272,13 +272,21 @@ Silo.View.getFromScope = function (variable, scope){
         var value = null;
         scope.each(function(){
             if(is_element(this)){
-                value = getFrom(Silo.scope, this.className + '.' + variable);
-                if(value === null) return true;  // continue scope each loop
-                return false; // break scope each loop
+                var ctrl = getFrom(Silo.scope, this.className);
+                if(!ctrl) return true;              // continue scope each loop
+                value = getFrom(ctrl, variable);
+                if(value === null) return true;     // continue scope each loop
+                if(is_function(value)){
+                    value = value.bind(ctrl);       // set this constant of function to controller object
+                }
+                return false;                       // break scope each loop
             }else{
                 value = getFrom(this, variable);
-                if(value === null) return true;
-                return false;
+                if(value === null) return true;     // continue scope each loop
+                if(is_function(value)){
+                    value = value.bind(this);       // set this constant of function to scope object
+                }
+                return false;                       // break scope each loop
             }
         });
         return value;
@@ -301,15 +309,17 @@ Silo.View.expressionValue = function(expression, scope){
                         /**
                          * parses string segment enclosed by single or double quotes
                          */
-                        segment = segment.replace(/^('|")/,'').replace(/('|")$/, '');
-                        console.log('its good')
-                        break;
+                        currentValue = segment.replace(/^('|")/,'').replace(/('|")$/, '');
 
                     }else if((match = segment.match(/([a-z][a-z0-9_\-\.]+)\(\)$/i))){
                         /**
                          * parse functions
                          */
-                       console.log('found function')
+                        var func = Silo.View.getFromScope(match[1], scope);
+                        if(is_function(func)){
+                            currentValue = func();
+                            console.log(currentValue)
+                        }
                     }
                     continue;
 
