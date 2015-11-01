@@ -296,49 +296,53 @@ Silo.View.getFromScope = function (variable, scope){
 Silo.View.expressionValue = function(expression, scope){
     expression = expression.replace(/^{{/, '').replace(/}}$/, '');
     var segments = expression.split(' ');
-    (function(segments, scope){
+    return (function(segments, scope){
         var currentValue = null;
         var operator = false;
 
         for(var a= 0, segment; segment = segments[a]; a++){
             switch(segment){
-                case '||': operator = '||'; break;
+                case '||':
+                    if(currentValue) return currentValue;
+                    operator = '||';
+                    break;
+
                 default:
 
                     if(segment.match(/^('|")/ || segment.match(/('|")$/))){
                         /**
-                         * parses string segment enclosed by single or double quotes
+                         * store string segment enclosed by single or double quotes
                          */
                         currentValue = segment.replace(/^('|")/,'').replace(/('|")$/, '');
 
                     }else if((match = segment.match(/([a-z][a-z0-9_\-\.]+)\(\)$/i))){
                         /**
-                         * parse functions
+                         * store function value
                          */
                         var func = Silo.View.getFromScope(match[1], scope);
                         if(is_function(func)){
                             currentValue = func();
-                            console.log(currentValue)
+                        }
+                    }else{
+                        /**
+                         * store scope value of variable
+                         */
+                        currentValue = Silo.View.getFromScope(segment, scope);
+                        if(typeof(currentValue) == 'object' || is_function(currentValue)){
+                            currentValue = false;
                         }
                     }
-                    continue;
 
-                    if(segment.match(/^('|")/ || segment.match(/('|")$/))){
-                        segment = segment.replace(/^('|")/,'').replace(/('|")$/, '');
-                        return false;
-                        break;
-                    }else if((match = segment.match(/([a-z][a-z0-9_\-\.]+)\(\)$/i))){
-                        var func = Silo.View.getFromScope(match[1], scope);
-                        console.log(func)
-                        return false;
-                    }else{
-                        return false;
-                        currentValue = Silo.View.getFromScope(segment, scope);
+                    switch(operator){
+                        case '||':
+                            if(currentValue) return currentValue;
+                            break;
                     }
-
+                    operator = false;
                     //console.log(segment+' = ' +currentValue);
             }
         }
+        return currentValue;
     })(segments, scope);
 }
 /**
@@ -352,15 +356,8 @@ Silo.View.renderExpressions = function(html, scope){
     if(!match) return false;
     for(var a= 0, expression; expression = match[a]; a++){
         var expressionValue = this.expressionValue(expression, scope);
+        console.log(expression + ' = ' +expressionValue)
     }
-    /*if((match = html.match(pattern))){
-        for(var a=0, expression; expression=match[a]; a++){
-            var expressionValue = (function(expression, scope){
-                console.log(match)
-                return Silo.View.expressionValue(expression, scope);
-            })(expression, scope);
-        }
-    }*/
     return html;
 }
 
