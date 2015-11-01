@@ -7,6 +7,7 @@ Silo.Router = new function(){
         if(!is_string(param.hash)) return false;
         if(!is_function(param.callback)) return false;
         this.routes.push(param);
+        return this;
     };
 
     this.route.current = false;
@@ -29,7 +30,9 @@ Silo.Router = new function(){
                 if(route.hash === window.location.hash.replace('#','')){
                     var scope = false;
                     if(!is_function(route.callback)) continue;
-                    if(is_string(route.controller)){
+                    if(is_object(route.controller)){
+                        scope = route.controller;
+                    }else if(is_string(route.controller)){
                         var ctrl = getFrom(Silo.scope, route.controller);
                         if(is_object(ctrl)){
                             scope = ctrl;
