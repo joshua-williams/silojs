@@ -86,7 +86,8 @@ Silo.View.renderElement = function(element, reload){
                 Silo.loadController(dt);
                 return false;
             case 'silo:if':
-                if(this.renderIf(dt.element)){
+                var expressionValue = this.renderIf(dt.element);
+                if(expressionValue){
                     dt.replaceWith(dt.element.innerHTML);
                 }else{
                     dt.remove();
@@ -105,12 +106,12 @@ Silo.View.renderElement = function(element, reload){
 }
 
 Silo.View.renderIf = function(element){
-    var condition = false;
+    var condition = null;
     var scope = Silo.scope(element,1);
 
     var attrs = element.attributes;
 
-    if(!attrs.length) return false;
+    if(!attrs.length) return null;
 
     if(attrs.length === 1){
         var subject = attrs[0].nodeName;
