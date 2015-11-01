@@ -11,21 +11,25 @@
             callback: this.gettingStarted,
             controller: this
         });
+        this.view = {
+            orderOfOperation: new Silo.View(this.path + '/views/order-of-operation.html'),
+            gettingStarted: new Silo.View(this.path + '/views/docs/getting-started.html')
 
+        };
     };
 
     this.orderOfOperation = function(){
-        var view = new Silo.View(this.path + '/views/order-of-operation.html');
-        view.render(this);
+        this.view.orderOfOperation.target($dom('#block-1')[0]);
+        this.view.orderOfOperation.render(this);
 
     };
     this.gettingStarted = function(){
-        console.log('getting Started');
+        this.view.gettingStarted.target($dom('#block-1')[0]);
+        this.view.gettingStarted.render(this);
     }
 
-    
     this.loadViews = function(){
-
+        return false;
         var view = new Silo.View(this.path + '/views/header.html');
         view.target(this.dom.find('header')[0]);
         view.render(this);
