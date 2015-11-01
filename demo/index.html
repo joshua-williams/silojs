@@ -10,12 +10,15 @@
         <script type="text/javascript" src="../v1.1/silo.js"></script>
         <style>
             body{  background:#f1f1f1; }
+            nav .nav > li{float:left;}
         </style>
     </head>
 
 
     <body>
         <div silo="Index" src="./silos">
+            <silo:view src="menu/main.html"></silo:view>
+
             <silo:controller src="Controller.Index">
                 <header></header>
                 <section>

@@ -50,8 +50,10 @@ var $dom = function(v, asDom, parent) {
                     dom.element.parentNode.insertBefore(div, dom.element);
                     dom.element.remove();
                 })(v,this)
+            }else if(is_element(v)){
+                this.element.parentNode.insertBefore(v, this.element);
             }
-        }
+        };
         this.remove = function(){this.element.parentNode.removeChild(this.element);}
         this.find = function(v){
             return (function(v,e){

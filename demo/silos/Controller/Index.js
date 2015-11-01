@@ -2,6 +2,7 @@
 
     this.construct = function(){
         console.log('Index controller loaded');
+        //Silo.Router.on('route')
         this.loadViews();
     };
 

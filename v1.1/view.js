@@ -148,10 +148,7 @@ Silo.View.load = function(element){
             load: function(html) {
                 var div = document.createElement('div');
                 div.innerHTML = html;
-
-                this.target.element.parentNode.insertBefore(div, this.element);
-                Silo.View.renderElement(div);
-                this.target.element.parentNode.removeChild(this.target.element);
+                this.target.replaceWith(div);
                 Silo.View.renderElement(div, 'view');
             },
             error: function(){
@@ -189,6 +186,7 @@ Silo.View.renderElement = function(element, reload){
 
             case 'silo:each':
                 this.renderEach(dt.element);
+                return false;
                 break;
         }
     }
@@ -243,7 +241,7 @@ Silo.View.renderEach = function(element){
     var markup = dom.html();
     var key = (dom.attr('key')) ? dom.attr('key') : 'key';
     if(!atts.length) return false;
-    var collection = false;;
+    var collection = false;
     scope.each(function(){
         var cltn =  getFrom(Silo.scope, this.className + '.' + atts[0].nodeName);
         if(cltn === null) return true;        // return true to continue Silo.scope.each loop
@@ -252,6 +250,7 @@ Silo.View.renderEach = function(element){
     });
 
     if(!is_array(collection)) return false;
+    var html = '';
 
     for(k in collection){
 
@@ -261,10 +260,15 @@ Silo.View.renderEach = function(element){
         arrayElement[key] = k
         arrayElement[alias] = collection[k];
         _scope.unshift(arrayElement);
-        this.renderExpressions(markup, _scope);
+        var _html = this.renderExpressions(markup, _scope);
+        if(_html === null){
+            console.log('Silo Expression Error around: ' + markup);
+            continue;
+        }
+        html += _html;
+        //html+= this.renderExpressions(markup, _scope);
     }
-
-    console.log(scope)
+    dom.replaceWith(html)
 }
 
 Silo.View.getFromScope = function (variable, scope){
@@ -351,14 +355,16 @@ Silo.View.expressionValue = function(expression, scope){
  * @desc will parse placeholder {{variables}} and {{expressions || functions()||
  */
 Silo.View.renderExpressions = function(html, scope){
-    var pattern = /{{([\w\s;:.,'"!|@#$%^&*()_+\-\[\]]+)}}/g;
-    var match = html.match(pattern);
-    if(!match) return false;
-    for(var a= 0, expression; expression = match[a]; a++){
-        var expressionValue = this.expressionValue(expression, scope);
-        console.log(expression + ' = ' +expressionValue)
-    }
-    return html;
+    return (function(html,scope){
+        var pattern = /{{([\w\s;:.,'"!|@#$%^&*()_+\-\[\]]+)}}/g;
+        var match = html.match(pattern);
+        if(!match) return null;
+        for(var a= 0, expression; expression = match[a]; a++){
+            var expressionValue = Silo.View.expressionValue(expression, scope);
+            html = html.replace(expression, expressionValue);
+        }
+        return html;
+    })(html, scope);
 }
 
 /**
