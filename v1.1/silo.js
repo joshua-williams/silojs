@@ -118,7 +118,7 @@ var Silo = new function(){
         try{
             eval('var ctrl = new ' + script);
             setTo(Silo.scope, className, ctrl);
-            console.log('______controller loaded__________' + className)
+            Silo.View.renderElement(this.target.dom.element, 'controller');
         }catch(e){
             console.log('Silo Controller Error on '+className+'\nError Message: ' + e.message+'\n')
         }

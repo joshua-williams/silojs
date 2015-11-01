@@ -194,6 +194,7 @@ Silo.View.load = function(element){
                 this.target.element.parentNode.insertBefore(div, this.element);
                 Silo.View.renderElement(div);
                 this.target.element.parentNode.removeChild(this.target.element);
+                Silo.View.renderElement(div, 'view');
             },
             error: function(){
                 console.log('Silo Error: Failed to load view ' + this.responseURL);
@@ -202,7 +203,10 @@ Silo.View.load = function(element){
     })(element);
 };
 
-Silo.View.renderElement = function(element){
+Silo.View.renderElement = function(element, reload){
+    if(reload){
+        //console.log('reloading ' + reload + ' element')
+    }
     if(!is_element(element)) return false;
     var scope = Silo.scope(element);
     var directiveTags = $dom(element).find('silo\\:controller,silo\\:include,silo\\:view, silo\\:if, silo\\:each');
@@ -211,18 +215,20 @@ Silo.View.renderElement = function(element){
         switch(dt.element.nodeName.toLowerCase()){
             case 'silo:include': case 'silo:view': this.load(dt.element); break;
             case 'silo:controller':
-                Silo.loadController(dt);
                 /**
                  * render this element again when the controller loads so that
                  * the dependency is loaded for the rest of the script following
-                 *
                  */
-                
+                Silo.loadController(dt);
                 return false;
-                break;
             case 'silo:if':
-                this.renderIf(dt.element);
-                break;
+                if(this.renderIf(dt.element)){
+                    dt.replaceWith(dt.element.innerHTML);
+                }else{
+                    dt.remove();
+                }
+                return this.renderElement(element);
+
             case 'silo:each':
 
                 break;
@@ -231,6 +237,7 @@ Silo.View.renderElement = function(element){
 }
 
 Silo.View.renderIf = function(element){
+    var condition = false;
     var scope = Silo.scope(element,1);
 
     var attrs = element.attributes;
@@ -245,19 +252,24 @@ Silo.View.renderIf = function(element){
              * this will render experssions such as:
              * <silo:if subject></silo:if>
              */
-           // console.log(subject)
             scope.each(function(){
-                var  s = getFrom(Silo.scope, this.className);
-                console.log(this.className);
-                console.log(getFrom(Silo.scope, 'Controller.Main'))
-                console.log(s)
-            })
+                condition = getFrom(Silo.scope, this.className);
+            });
         }else{
             /**
              * this will render expressions such as:
              * <silo:if subject="test subject">
              */
+            scope.each(function(){
+                var val = getFrom(Silo.scope, this.className+'.'+subject);
+                if(val == value){
+                    condition = true;
+                }
+                //console.log(ctrl)
+                //console.log(val+ ' : ' + value);
+            });
         }
+        return condition;
     }
     if(value === ''){
 
