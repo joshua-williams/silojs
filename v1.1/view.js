@@ -4,6 +4,7 @@ Silo.View = function(param){
         this.load = param.load || false;
         this.error =  param.error || false;
         this.html = false;
+        this.element = false;
 
         this.target = function(v){
             if(v === undefined){return this.target.dom;}
@@ -19,14 +20,11 @@ Silo.View = function(param){
             Silo.Loader.load({
                 url: (window.location.search.match(/debug/)) ? this.url + '?' + Date.now() : this.url,
                 target: {view:this,variables:variables},
-                load: function(){
-                    if(this.statusText === "OK"){
-                        var el = this.target.view.target();
-                        if(el){
-                            el.html(this.responseText)
-                        }
-                    }else{
-
+                load: function(html){
+                    if(is_element(this.target.view.element)){
+                        this.target.view.element.innerHTML = html;
+                        Silo.View.renderElement(this.target.view.element);
+                        console.log('view rendered');
                     }
                 }
             })
@@ -57,7 +55,7 @@ Silo.View.load = function(element){
             load: function(html) {
                 var div = document.createElement('div');
                 div.innerHTML = html;
-                this.target.replaceWith(div);
+                var el = this.target.replaceWith(div);
                 Silo.View.renderElement(div, 'view');
             },
             error: function(){

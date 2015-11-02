@@ -133,27 +133,6 @@ var Silo = new function(){
         console.log('controller failed to load');
     };
 
-    this.loadControllerBak = function(ctrl, path){
-        if (!(src = ctrl.attr('src'))) {
-            ctrl.remove();
-            return;
-        }
-        ctrl.path = path;
-        var url = path + '/' + src.replace('.','/') + '.js';
-        Silo.Loader.load({
-            url: url,
-            target: {dom:ctrl, path:path},
-            load: function(e){
-                var dom = this.target.dom;
-                var controller = eval('new ' + this.responseText);
-                controller.dom = ctrl;
-                controller.path = this.target.path;
-                if(is_function(controller.construct)){controller.construct(); }
-                setTo(Silo.scope, dom.attr('src'), controller);
-            }
-        })
-    };
-
     this.initLoadControllers = function(silo){
         (function(silo){
             var path = silo.attr('src') || '.';
