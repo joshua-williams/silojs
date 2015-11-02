@@ -17,8 +17,9 @@ Silo.View = function(param){
         this.target.dom = (is_element(getFrom(param,'target.element'))) ? param.target : false;
 
         this.render = function(variables) {
+            var url = (window.location.search.match(/debug/)) ? this.url + '?' + Date.now() : this.url;
             Silo.Loader.load({
-                url: (window.location.search.match(/debug/)) ? this.url + '?' + Date.now() : this.url,
+                url: url,
                 target: {view:this,variables:variables},
                 load: function(html){
                     if(is_element(this.target.view.element)){
