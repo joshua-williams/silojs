@@ -52,7 +52,8 @@ var $dom = function(v, asDom, parent) {
                     return div;
                 })(v,this)
             }else if(is_element(v)){
-                this.element.parentNode.insertBefore(v, this.element)
+                this.element.parentNode.insertBefore(v, this.element);
+                this.element.parentNode.removeChild(this.element)
                 return v;
             }
         };

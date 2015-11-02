@@ -25,7 +25,6 @@ Silo.View = function(param){
                     if(is_element(this.target.view.element)){
                         this.target.view.element.innerHTML = html;
                         Silo.View.renderElement(this.target.view.element);
-                        console.log('view rendered');
                     }
                 }
             })
@@ -73,35 +72,41 @@ Silo.View.renderElement = function(element, reload){
     if(!is_element(element)) return false;
     var scope = Silo.scope(element);
     var directiveTags = $dom(element).find('silo\\:controller,silo\\:include,silo\\:view, silo\\:if, silo\\:each');
-    for(var b= 0, dt; dt=directiveTags[b]; b++){
-        //dt.silo = siloTag;
-        switch(dt.element.nodeName.toLowerCase()){
-            case 'silo:include': case 'silo:view': this.load(dt.element); break;
-            case 'silo:controller':
-                /**
-                 * render this element again when the controller loads so that
-                 * the dependency is loaded for the rest of the script following
-                 */
-                Silo.loadController(dt);
-                return false;
-            case 'silo:if':
-                var expressionValue = this.renderIf(dt.element);
-                if(expressionValue){
-                    dt.replaceWith(dt.element.innerHTML);
-                }else{
-                    dt.remove();
-                }
-                return this.renderElement(element);
+    if(directiveTags.length){
+        for(var b= 0, dt; dt=directiveTags[b]; b++){
+            //dt.silo = siloTag;
+            switch(dt.element.nodeName.toLowerCase()){
+                case 'silo:include': case 'silo:view': this.load(dt.element); break;
+                case 'silo:controller':
+                    /**
+                     * render this element again when the controller loads so that
+                     * the dependency is loaded for the rest of the script following
+                     */
+                    Silo.loadController(dt);
+                    return false;
+                case 'silo:if':
+                    var expressionValue = this.renderIf(dt.element);
+                    if(expressionValue){
+                        dt.replaceWith(dt.element.innerHTML);
+                    }else{
+                        dt.remove();
+                    }
+                    return this.renderElement(element);
 
-            case 'silo:each':
-                var el = this.renderEach(dt.element);
-                if(el === null){
-                    $dom(element).remove();
-                }
-                return this.renderElement(element);
-                break;
+                case 'silo:each':
+                    var el = this.renderEach(dt.element);
+                    if(el === null){
+                        $dom(element).remove();
+                    }
+                    return this.renderElement(element);
+                    break;
+            }
         }
+    }else{
+        html = this.renderExpressions(element.innerHTML, scope);
+        element.innerHTML = html;
     }
+
 }
 
 Silo.View.renderIf = function(element){
@@ -268,7 +273,7 @@ Silo.View.renderExpressions = function(html, scope){
     return (function(html,scope){
         var pattern = /{{([\w\s;:.,'"!|@#$%^&*()_+\-\[\]]+)}}/g;
         var match = html.match(pattern);
-        if(!match) return null;
+        if(!match) return html;
         for(var a= 0, expression; expression = match[a]; a++){
             var expressionValue = Silo.View.expressionValue(expression, scope);
             html = html.replace(expression, expressionValue);
