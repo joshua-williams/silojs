@@ -26,6 +26,7 @@ Silo.Router = new function(){
 
     this.hash.change = function(e){
         (function(that){
+            console.log('initial route')
             for(var a= 0, route; route=that.routes[a]; a++){
                 if(route.hash === window.location.hash.replace('#','')){
                     var scope = false;

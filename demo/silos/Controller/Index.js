@@ -1,33 +1,34 @@
 (function(){
-
+    this.title = 'Silojs Javascript Framework';
     this.construct = function(){
-        this.loadViews();
-        Silo.Router.route({
-            hash: 'docs/order-of-operation',
-            callback: this.orderOfOperation,
-            controller: 'Controller.Index'
-        }).route({
-            hash: 'docs/getting-started',
-            callback: this.gettingStarted,
-            controller: this
-        });
+
+        Silo.Router
+            .route({hash: 'docs/order-of-operation', callback: this.orderOfOperation, controller: 'Controller.Index'})
+            .route({ hash: 'docs/getting-started', callback: this.gettingStarted, controller: this})
+            .route({hash: 'docs/reference/view',  callback: this.viewReference, controller: this});
         this.view = {
             orderOfOperation: new Silo.View(this.path + '/views/order-of-operation.html'),
-            gettingStarted: new Silo.View(this.path + '/views/docs/getting-started.html')
-
+            gettingStarted: new Silo.View(this.path + '/views/docs/getting-started.html'),
+            viewReference: new Silo.View(this.path + '/views/docs/views.html')
         };
     };
-
     this.orderOfOperation = function(){
+        this.title = 'Order of Operation';
         this.view.orderOfOperation.target($dom('#block-1')[0]);
         this.view.orderOfOperation.render(this);
 
     };
     this.gettingStarted = function(){
+        this.title = 'Getting Started with Silojs'
         this.view.gettingStarted.target($dom('#block-1')[0]);
         this.view.gettingStarted.render(this);
     }
 
+    this.viewReference = function(){
+        this.title = 'Silo View Reference';
+        this.view.viewReference.target($dom('#block-1')[0]);
+        this.view.viewReference.render(this);
+    }
     this.loadViews = function(){
         return false;
         var view = new Silo.View(this.path + '/views/header.html');
