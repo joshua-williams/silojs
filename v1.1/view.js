@@ -98,7 +98,6 @@ Silo.View.renderElement = function(element, reload){
                         $dom(element).remove();
                     }
                     return this.renderElement(element);
-                    break;
             }
         }
     }else{

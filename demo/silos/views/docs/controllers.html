@@ -1,0 +1,17 @@
+<div>
+    <h3>Silo Controllers</h3>
+    <p>
+        You can nest controllers to unlimited depth. <br>
+        Controllers may also wrap external views.
+        <b>When declaring silo controllers from external resources (views and includes)
+            you must wrap the controller inside a silo container.
+        </b>
+    </p>
+    <xmp>
+        <div silo="Signup">
+            <silo:controller src="Controller.Signups">
+                <p>This is an external view with a controller</p>
+            </silo:controller>
+        </div>
+    </xmp>
+</div>

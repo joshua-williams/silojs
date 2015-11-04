@@ -8,7 +8,10 @@ var silolib = ['global','loader','cache','router','view'];
         s.addEventListener('load', function(){
             var src = this.getAttribute('src').match(/([a-z0-9_\-]+)\.js$/)[1];
             silolib.splice(silolib.indexOf(src),1);
-            if(!silolib.length){  Silo.ready(); }
+            if(!silolib.length){
+                Silo.config('ready', true);
+                Silo.ready();
+            }
         })
         s.setAttribute('type', 'text/javascript'),
             s.setAttribute('src', path);
@@ -19,15 +22,32 @@ var silolib = ['global','loader','cache','router','view'];
 var Silo = new function(){
     this.listeners = [];
 
+    this.config = function(n,v){
+        return (function(){
+            if(is_string(n)){
+                if(v != undefined) return Silo.config[n] = v;
+                return Silo.config[n];
+            }else if(is_object(n)){
+                for(key in n){
+                    Silo.config(key, n[key]);
+                };
+            }
+        })();
+    }
+    this.config.initialized = false;
+    this.config.ready = false;
+
     this.ready = function(callback){
-        if(callback === undefined){
-            (function(that){
-                for(var a= 0, cb; cb=that.listeners[a]; a++){
-                    cb();
-                }
-            })(this);
-        }else if(typeof(callback) === 'function'){
-            this.listeners.push(callback);
+        if(typeof(callback) === 'function'){
+           return this.listeners.push(callback);
+        }else if(callback === undefined){
+            if(Silo.config('initialized')){
+                (function(){
+                    for(var a= 0, cb; cb=Silo.listeners[a]; a++){
+                        cb();
+                    }
+                })();
+            }
         }
     };
 
@@ -80,13 +100,8 @@ var Silo = new function(){
                 Silo.View.renderElement(siloTag.element);
             }
         }
-
-        (function(){
-            for(var a= 0, func; func=Silo.listeners[a]; a++){
-                func();
-            }
-        })();
-
+        this.config('initialized', true);
+        this.ready();
     };
 
     this.loadController = function(ctrl){
@@ -122,7 +137,7 @@ var Silo = new function(){
         eval('var ctrl = new ' + script);
         ctrl.dom = this.target.dom;
         var silo = $dom(Silo.getSilo(ctrl.dom.element));
-        ctrl.path = (silo.attr('src')) ? silo.attr('src') : '.';
+        ctrl.path = (silo && silo.attr('src')) ? silo.attr('src') : '.';
         setTo(Silo.scope, className, ctrl);
         Silo.View.renderElement(this.target.dom.element, 'controller');
         if(is_function(ctrl.construct)){
