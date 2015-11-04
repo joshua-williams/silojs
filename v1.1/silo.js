@@ -21,7 +21,7 @@ var silolib = ['global','loader','cache','router','view'];
 
 var Silo = new function(){
     this.listeners = [];
-
+    this.queue = [];
     this.config = function(n,v){
         return (function(){
             if(is_string(n)){
@@ -115,6 +115,13 @@ var Silo = new function(){
             }else{
                 return false;
             }
+            /**
+             * prevent duplicate requests
+             * queue controllers in case same resource called
+             * from an include or view before initial request loads
+             */
+            if(Silo.queue.indexOf(ctrl.attr('src')) != -1) return false;
+
             if((silo = Silo.getSilo(dom.element))){
                 var path = $dom(silo).attr('src') || '.';
             }else{
@@ -122,6 +129,8 @@ var Silo = new function(){
             }
             var src = dom.attr('src').replace('.', '/') + '.js';
             var url = path + '/' + src;
+
+            Silo.queue.push(ctrl.attr('src'));
             Silo.Loader.load({
                 url: url,
                 target: {dom:dom},
@@ -134,6 +143,7 @@ var Silo = new function(){
 
     this.onLoadController = function(script){
         var className = this.target.dom.attr('src');
+        Silo.queue.splice(Silo.queue.indexOf(className),1);
         eval('var ctrl = new ' + script);
         ctrl.dom = this.target.dom;
         var silo = $dom(Silo.getSilo(ctrl.dom.element));
