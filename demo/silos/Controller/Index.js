@@ -12,13 +12,6 @@
             gettingStarted: new Silo.View(this.path + '/views/docs/getting-started.html'),
             viewReference: new Silo.View(this.path + '/views/docs/views.html'),
         };
-        // do initital routing
-        var hash = window.location.hash.replace('#','');
-        for(var a= 0, route; route=Silo.Router.routes[a]; a++){
-            if(route.hash == hash){
-                route.callback.bind(this)();
-            }
-        }
     };
 
     this.orderOfOperation = function(){
@@ -34,10 +27,11 @@
     }
 
     this.viewReference = function(){
-        this.title = 'Silo View Reference';
+        this.title = 'Silojs View Reference';
         this.view.viewReference.element = $dom('#block-1',1)[0];
         this.view.viewReference.render(this);
     }
+
     this.loadViews = function(){
         return false;
         var view = new Silo.View(this.path + '/views/header.html');

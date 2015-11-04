@@ -32,7 +32,7 @@ var Silo = new function(){
     };
 
     this.scope = function(dom,debug){
-
+        if(!dom) return null;
         if(is_string(dom)) return getFrom(Silo.scope, dom);
         if(is_element(dom)){
 
@@ -127,6 +127,19 @@ var Silo = new function(){
         Silo.View.renderElement(this.target.dom.element, 'controller');
         if(is_function(ctrl.construct)){
             ctrl.construct();
+        }
+        /**
+         * After controller construct dispatch route event
+         */
+        for(var a= 0, route; route=Silo.Router.routes[a]; a++){
+            if(route.controller === ctrl){
+                var hash = window.location.hash.replace('#','');
+                if(route.hash === hash){
+                    if(is_function(route.callback)){
+                        route.callback.bind(ctrl)();
+                    }
+                }
+            }
         }
     };
     this.onErrorController = function(){

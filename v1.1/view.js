@@ -43,12 +43,11 @@ Silo.View.load = function(element){
             case 'silo:view':
                 var scope = Silo.scope(element);
                 if((silo = $dom(Silo.getSilo(element)))){
-                    src = (silo.attr('src')) ? silo.attr('src') + '/views/' + src : src;
+                    src = (silo.attr('src')) ? silo.attr('src') + '/views/' + src : './views/'+src;
                 }
                 break;
             case 'silo:include': break;
         }
-
         Silo.Loader.load({
             url: src,
             target: dom,
@@ -105,7 +104,38 @@ Silo.View.renderElement = function(element, reload){
     }else{
         html = this.renderExpressions(element.innerHTML, scope);
         element.innerHTML = html;
+        this.addSiloEvents(element);
     }
+
+}
+/**
+ *
+ * @param element - The dom element to set the
+ */
+Silo.View.addSiloEvents = function(element){
+    (function(element){
+        var dom = $dom(element);
+        var elements = $dom('[silo-click],[silo-dblclick],[silo-mouseup],[silo-mousedown]');
+        for(var a= 0, e; e=elements[a]; a++){
+
+            if((callbackName = e.attr('silo-click'))){
+                var event = 'click';
+            }else if((callbackName = e.attr('silo-mousedown'))){
+                var event = 'mousedown';
+            }else if((callbackName = e.attr('silo-mouseup'))){
+                var event = 'mouseup';
+            }else if((callbackName = e.attr('silo-dblclick'))){
+                var event = 'dblclick';
+            }else{return false;}
+
+            var parentName = callbackName.trim().replace(/\.[a-z0-9_]+$/i, '');
+            if(!(parent = Silo.scope(parentName))) continue;
+            if(!(callback = Silo.scope(callbackName))) continue;
+            if(!is_function(callback)) continue;
+            e.element.addEventListener('click', callback.bind(parent));
+            Silo.Cache.event('click', e.element, callback.bind(parent));
+        }
+    })(element);
 
 }
 
@@ -281,3 +311,4 @@ Silo.View.renderExpressions = function(html, scope){
         return html;
     })(html, scope);
 }
+

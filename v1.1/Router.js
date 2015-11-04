@@ -6,6 +6,9 @@ Silo.Router = new function(){
         if(!is_object(param)) return false;
         if(!is_string(param.hash)) return false;
         if(!is_function(param.callback)) return false;
+        if(is_string(param.controller)){
+            param.controller = getFrom(Silo.scope, param.controller);
+        }
         this.routes.push(param);
         return this;
     };
