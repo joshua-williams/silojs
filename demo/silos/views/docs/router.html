@@ -1,0 +1,24 @@
+<h3>{{title}}</h3>
+<p>
+    The Silo Router allows you to set callback functions and scope to the hash change event.
+    This helps faciliate model view controller design in javscript.
+</p>
+
+<xmp>
+    <script type="text/javascript">
+        function albums(){
+            alert('lets listen to an album');
+        }
+
+        Silo.Ready(function(){
+
+            Silo.Router.route({
+                hash: 'music',
+                callback: function(){
+                    alert('lets listen to some music');
+                }
+            })
+            Silo.Router.route({hash:'albums', callback: window.albums})
+        })
+    </script>
+</xmp>

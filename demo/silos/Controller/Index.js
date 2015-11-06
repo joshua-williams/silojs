@@ -6,12 +6,30 @@
         Silo.Router
             .route({hash: 'docs/order-of-operation', callback: this.orderOfOperation, controller: 'Controller.Index'})
             .route({ hash: 'docs/getting-started', callback: this.gettingStarted, controller: this})
-            .route({hash: 'docs/reference/view',  callback: this.viewReference, controller: this});
+            .route({hash: 'docs/reference/view',  callback: this.viewReference, controller: this})
+            .route({hash:'docs/reference/controller', callback: this.ctrlReference, controller:this})
+            .route({hash:'docs/reference/router', callback: this.routerReference, controller:this});
         this.view = {
             orderOfOperation: new Silo.View(this.path + '/views/order-of-operation.html'),
             gettingStarted: new Silo.View(this.path + '/views/docs/getting-started.html'),
             viewReference: new Silo.View(this.path + '/views/docs/views.html'),
+            ctrlReference: new Silo.View(this.path + '/views/docs/controller.html'),
+            routerReference: new Silo.View(this.path + '/views/docs/router.html'),
         };
+    };
+
+    this.ctrlReference = function(){
+        this.title = 'Silo Controller';
+        this.view.ctrlReference.element = $dom('#block-1',1)[0];
+        this.view.ctrlReference.render(this);
+
+    };
+
+    this.routerReference = function(){
+        this.title = 'Silo Router';
+        this.view.routerReference.element = $dom('#block-1',1)[0];
+        this.view.routerReference.render(this);
+
     };
 
     this.orderOfOperation = function(){
