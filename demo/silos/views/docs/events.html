@@ -1,0 +1,42 @@
+<style>
+    xmp{
+        border: thin #ccc solid;
+        background: #fff;
+    }
+</style>
+<h3>Silo Events</h3>
+<p>
+    Silojs supports the following events:
+</p>
+<ul>
+    <li>click</li>
+    <li>dblclick</li>
+    <li>mousedown</li>
+    <li>mouseup</li>
+</ul>
+<p>
+    You can add silo events to dom elements with the silo-[eventName] attribute
+</p>
+<xmp>
+    <script type="text/javascript">
+        function testClick(){
+            alert('This is a silo-click test');
+        }
+    </script>
+
+    <button silo-click="testClick">Silo Click</button>
+
+</xmp>
+
+<p>
+    When working with nested controllers and views, it is important to provide the full class name and function
+    name as the silo-event value.  The following would be an example of how you would add a click event to an external view.
+</p>
+
+<xmp>
+    <silo:controller>
+        <a href="#" silo-click="Controller.Test.testClick">Silo Click</a>
+    </silo:controller>
+
+</xmp>
+

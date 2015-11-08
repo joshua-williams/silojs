@@ -65,9 +65,6 @@ Silo.View.load = function(element){
 };
 
 Silo.View.renderElement = function(element, reload){
-    if(reload){
-        //console.log('reloading ' + reload + ' element')
-    }
     if(!is_element(element)) return false;
     var scope = Silo.scope(element);
     var directiveTags = $dom(element).find('silo\\:controller,silo\\:include,silo\\:view, silo\\:if, silo\\:each');
@@ -115,6 +112,7 @@ Silo.View.addSiloEvents = function(element){
     (function(element){
         var dom = $dom(element);
         var elements = $dom('[silo-click],[silo-dblclick],[silo-mouseup],[silo-mousedown]');
+
         for(var a= 0, e; e=elements[a]; a++){
 
             if((callbackName = e.attr('silo-click'))){
@@ -125,14 +123,27 @@ Silo.View.addSiloEvents = function(element){
                 var event = 'mouseup';
             }else if((callbackName = e.attr('silo-dblclick'))){
                 var event = 'dblclick';
-            }else{return false;}
+            }else{ continue;}
 
-            var parentName = callbackName.trim().replace(/\.[a-z0-9_]+$/i, '');
-            if(!(parent = Silo.scope(parentName))) continue;
-            if(!(callback = Silo.scope(callbackName))) continue;
-            if(!is_function(callback)) continue;
-            e.element.addEventListener('click', callback.bind(parent));
-            Silo.Cache.event('click', e.element, callback.bind(parent));
+            if(callbackName.match(/\./)) {
+                var parentName = callbackName.trim().replace(/\.[a-z0-9_]+$/i, '');
+                if(!(parent = Silo.scope(parentName))) continue;
+                if(!(callback = Silo.scope(callbackName))) continue;
+                if(!is_function(callback)) continue;
+                e.element.addEventListener('click', callback.bind(parent));
+                Silo.Cache.event('click', e.element, callback.bind(parent));
+            }else{
+                var scope = Silo.scope(e.element);
+                if(!scope.length) continue;
+                for(var b= 0, s; s=scope[b]; b++){
+                    s = $dom(s);
+                    var ctrl = Silo.scope(s.attr('src'));
+                    if(!is_function(ctrl[callbackName])) continue;
+                    e.element.addEventListener(event, ctrl[callbackName].bind(ctrl));
+                    Silo.Cache.event(event, e.element, ctrl[callbackName].bind(ctrl));
+                    break;
+                }
+            }
         }
     })(element);
 

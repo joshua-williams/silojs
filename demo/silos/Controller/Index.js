@@ -8,14 +8,23 @@
             .route({ hash: 'docs/getting-started', callback: this.gettingStarted, controller: this})
             .route({hash: 'docs/reference/view',  callback: this.viewReference, controller: this})
             .route({hash:'docs/reference/controller', callback: this.ctrlReference, controller:this})
-            .route({hash:'docs/reference/router', callback: this.routerReference, controller:this});
+            .route({hash:'docs/reference/router', callback: this.routerReference, controller:this})
+            .route({hash:'docs/reference/events', callback:this.eventsReference, controller:this});
         this.view = {
             orderOfOperation: new Silo.View(this.path + '/views/order-of-operation.html'),
             gettingStarted: new Silo.View(this.path + '/views/docs/getting-started.html'),
             viewReference: new Silo.View(this.path + '/views/docs/views.html'),
             ctrlReference: new Silo.View(this.path + '/views/docs/controller.html'),
             routerReference: new Silo.View(this.path + '/views/docs/router.html'),
+            eventsReference: new Silo.View(this.path + '/views/docs/events.html'),
         };
+    };
+
+    this.eventsReference = function(){
+        this.title = 'Silo Events';
+        this.view.eventsReference.element = $dom('#block-1',1)[0];
+        this.view.eventsReference.render(this);
+
     };
 
     this.ctrlReference = function(){
