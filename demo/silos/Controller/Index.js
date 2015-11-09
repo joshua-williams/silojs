@@ -9,7 +9,8 @@
             .route({hash: 'docs/reference/view',  callback: this.viewReference, controller: this})
             .route({hash:'docs/reference/controller', callback: this.ctrlReference, controller:this})
             .route({hash:'docs/reference/router', callback: this.routerReference, controller:this})
-            .route({hash:'docs/reference/events', callback:this.eventsReference, controller:this});
+            .route({hash:'docs/reference/events', callback:this.eventsReference, controller:this})
+            .route({hash:'docs/persist-binding', callback:this.persistBinding, controller:this});
         this.view = {
             orderOfOperation: new Silo.View(this.path + '/views/order-of-operation.html'),
             gettingStarted: new Silo.View(this.path + '/views/docs/getting-started.html'),
@@ -17,7 +18,14 @@
             ctrlReference: new Silo.View(this.path + '/views/docs/controller.html'),
             routerReference: new Silo.View(this.path + '/views/docs/router.html'),
             eventsReference: new Silo.View(this.path + '/views/docs/events.html'),
+            persistBinding: new Silo.View(this.path + '/views/docs/bind.html'),
         };
+    };
+
+    this.persistBinding = function(){
+        this.title = 'Silojs Persist Data Binding';
+        this.view.persistBinding.element = $dom('#block-1',1)[0];
+        this.view.persistBinding.render(this);
     };
 
     this.eventsReference = function(){

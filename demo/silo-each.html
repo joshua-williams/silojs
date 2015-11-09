@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script type="text/javascript" src="/silojs/lib/silo.js"></script>
+        <style>
+            [silo-cache]{display:none;}
+        </style>
+        <script type="text/javascript">
+            var fields = [{
+                name: 'First Name',
+                type: 'text'
+            },{
+                name: 'Last Name',
+                type: 'text'
+            }];
+
+
+            function renderSiloEach(element){
+                if(!is_element(element)) return false;
+                /*
+                var render = (function(element){
+                    return function(){
+                        var dom = $dom(element);
+                        var parent = element.parentNode;
+                        var expression = dom.attr('silo-each');
+
+                        var parts = expression.trim().split(' ');
+                        var pattern = /([a-z0-9\_]+) as ([a-z0-9\_]+)/i;
+                        var match = expression.trim().match(pattern);
+                        if(!match) return false;
+                        var scope = Silo.scope(element);
+                        var markup = dom.html();
+                        var subject = false;
+
+                        scope.each(function(){
+                            subject = getFrom(this, match[1]);
+                            if(subject) return false;
+                        });
+
+                        if(!subject || !is_array(subject)) return element;
+
+                        html = '';
+                        for(var a= 0,i; i=subject[a]; a++){
+                            var el = document.createElement(element.nodeName);
+                            var iteration = {};
+                            var _scope = {};
+                            if(persist !== null){
+                                el.setAttribute('silo-bind-each', bindIndex)
+                            }
+                            _scope[match[2]] = i;
+                            _scope[dom.attr('silo-index') || 'index'] = a;
+                            scope.unshift(_scope);
+                            el.innerHTML = Silo.View.renderExpressions(markup, scope);
+
+                            for(var b= 0, attr; attr=element.attributes[b]; b++){
+                                if(attr.nodeName.match(/^silo/)) continue;
+                                el.setAttribute(attr.nodeName, Silo.View.renderExpressions(attr.nodeValue, scope))
+                            }
+
+
+                            parent.insertBefore(el, element);
+                            scope.splice(0,1);
+                        }
+
+                    }
+                })(element);
+                if(is_function(element.render)){
+
+                }else{
+                    element.render = render.bind(element);
+                }
+
+
+                return false;
+                */
+
+                var dom = $dom(element);
+                var parent = element.parentNode;
+                var expression = dom.attr('silo-each');
+                var pattern = /([a-z0-9\_]+) as ([a-z0-9\_]+)/i;
+                var match = expression.trim().match(pattern);
+                if(!match) return false;
+                var scope = Silo.scope(element);
+                var markup = dom.html();
+                var subject = false;
+
+                scope.each(function(){
+                    subject = getFrom(this, match[1]);
+                    if(subject) return false;
+                });
+
+                if(!subject || !is_array(subject)) return element;
+                var persist = dom.attr('silo-persist');
+                if(persist !== null){
+                    element.render = function(){
+                        console.log('rendering from each element');
+                        console.log(this)
+                    }
+                    var bindIndex = Silo.Cache.each(element, subject);
+                    dom.attr('silo-cache', bindIndex);
+                    subject.push = (function(subject, element, index){
+                        return function(val){
+                            console.log('start rendering each cache')
+                            for(var a= 0, callback; callback = this.push.callbacks[a]; a++){
+                                if(!is_function(callback)) continue;
+                                callback();
+                            }
+                            Array.prototype.push.bind(subject,val)();
+                        }
+                    })(subject, element, bindIndex);
+
+                    subject.push.callbacks = [];
+                    var callback = (function(idx){
+                        return function(){
+                            var children = $dom('[silo-bind-each="'+idx+'"]');
+                            for(var a= 0, child; child=children[a]; a++){
+                               // child.remove();
+                            }
+                            var element = Silo.Cache.each.items[idx].element
+                            element.render();
+                        }
+                    })(bindIndex);
+                    subject.push.callbacks.push(callback);
+                }
+                (function(){
+                    html = '';
+                    for(var a= 0,i; i=subject[a]; a++){
+                        var el = document.createElement(element.nodeName);
+                        var iteration = {};
+                        var _scope = {};
+                        if(persist !== null){
+                            el.setAttribute('silo-bind-each', bindIndex)
+                        }
+                        _scope[match[2]] = i;
+                        _scope[dom.attr('silo-index') || 'index'] = a;
+                        scope.unshift(_scope);
+                        el.innerHTML = Silo.View.renderExpressions(markup, scope);
+
+                        for(var b= 0, attr; attr=element.attributes[b]; b++){
+                            if(attr.nodeName.match(/^silo/)) continue;
+                            el.setAttribute(attr.nodeName, Silo.View.renderExpressions(attr.nodeValue, scope))
+                        }
+
+
+                        parent.insertBefore(el, element);
+                        scope.splice(0,1);
+                    }
+                })();
+            }
+
+            Silo.ready(function(){
+                var eaches = $dom('[silo-each]');
+                for(var a= 0, i; i=eaches[a]; a++){
+                    //renderSiloEach(i.element)
+                    Silo.Bind.each(i.element, Silo.scope(i.element));
+
+                }
+            });
+        </script>
+    </head>
+
+    <body xmlns:silo="http://silojs.com">
+        <table>
+            <thead>
+                <td>Column</td> <td>Type</td>
+            </thead>
+            <tbody>
+                <tr silo-each="fields as fls">
+                    <td>{{fld.name}}</td>
+                    <td>{{fld.type}}</td>
+                </tr>
+            </tbody>
+            <tbody>
+                <tr silo-each="fields as fld" silo-index="idx" data-index="{{idx}}" silo-persist>
+                    <td class="column-{{idx}}">{{fld.name}}</td>
+                    <td class="column-{{idx}}">{{fld.type}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </body>
+</html>

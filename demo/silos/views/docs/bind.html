@@ -1,0 +1,33 @@
+<h3>Persist Data Binding with Silojs</h3>
+
+<h5>Silo.Bind Method</h5>
+<p>
+    Silojs provides binding functionality to dom elements.
+    To bind each loops do this
+</p>
+<xmp>
+    <silo:each products as="item" persist>
+        <h3>{{item.title}}</h3>
+        <p>{{item.description}}</p>
+    </silo:each>
+</xmp>
+
+<p>
+    By providing the persist attribute to the silo:each element
+    any time the products collection changes the silo element is re-rendered.
+    This will ensure persistent syncronization of the dom element and data source.
+</p>
+
+<p>
+    You can also use persist data bining on form element.
+    The example above will listen for change on Controller.Product.item and automatically update
+    the input's value.
+</p>
+
+<xmp>
+    <input type="text" silo-bind="Controller.Product.item">
+</xmp>
+
+<p>
+    You can bind the silo expressions of an element
+</p>
