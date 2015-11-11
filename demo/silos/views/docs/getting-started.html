@@ -6,17 +6,20 @@
 <p>
     This document describes the lifecycle of SiloJs.
 </p>
-<h3>Silo Components</h3>
+<h3>Silo Modules</h3>
 <p>
-    Silo js will first render content within a silo component.<br>
-    The following demonstrates how to initiate a silo components:
+    Silo js will first render content within a silo module.<br>
+    The following demonstrates how to initiate a silo module:
 </p>
-<h4 style="margin:0px">Silo Component Configuration</h4>
+<h4 style="margin:0px">Silo Module Configuration</h4>
 <xmp><body silo="Demo"></body></xmp>
 
 <p>
     Yes, it is that simple.<br>
-    Silo components may not be nested and can be used on any dom element
+    Multiple silo elements may exist simultaniously, however,
+    silo modules may not be nested.
+    A &quot;silo&quot; is identified by the <em>silo</em> attribute
+    and can be attached to any dom element.
 </p>
 
 <h3>Silo Controllers</h3>
