@@ -14,7 +14,7 @@
         this.view = {
             orderOfOperation: new Silo.View(this.path + '/views/order-of-operation.html'),
             gettingStarted: new Silo.View(this.path + '/views/docs/getting-started.html'),
-            viewReference: new Silo.View(this.path + '/views/docs/views.html'),
+            viewReference: new Silo.View(this.path + '/views/docs/views'),
             ctrlReference: new Silo.View(this.path + '/views/docs/controller.html'),
             routerReference: new Silo.View(this.path + '/views/docs/router.html'),
             eventsReference: new Silo.View(this.path + '/views/docs/events.html'),
