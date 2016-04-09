@@ -1,0 +1,22 @@
+{
+  "name": "silojs",
+  "version": "1.0.0",
+  "description": "A javascript framework",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://swfx@bitbucket.org/swfx/silojs.git"
+  },
+  "author": "Joshua D. Williams",
+  "license": "MIT",
+  "homepage": "https://bitbucket.org/swfx/silojs#readme",
+  "devDependencies": {
+    "grunt": "^1.0.1",
+    "grunt-contrib-concat": "^1.0.0",
+    "grunt-contrib-uglify": "^1.0.1",
+    "grunt-contrib-watch": "^1.0.0"
+  }
+}
