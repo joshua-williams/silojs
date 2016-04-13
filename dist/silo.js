@@ -712,7 +712,19 @@ Silo.View.renderIf = function(element){
              * <silo:if subject></silo:if>
              */
             scope.each(function(){
-                condition = getFrom(Silo.scope, this.className);
+            	if(this.className){
+            		var _cond = getFrom(Silo.scope, this.className, 'SILO_FALSE');
+                    if(_cond !== 'SILO_FALSE'){
+                    	condition = _cond;
+                    	return false;
+                    }
+            	}else{
+            		var _cond = getFrom(this, subject, 'SILO_FALSE');
+            		if(_cond !== 'SILO_FALSE'){
+            			condition = _cond;
+            			return false;
+            		}
+            	}
             });
         }else{
             /**
@@ -720,10 +732,20 @@ Silo.View.renderIf = function(element){
              * <silo:if subject="test subject">
              */
             scope.each(function(){
-                var val = getFrom(Silo.scope, this.className+'.'+subject);
-                if(val == value){
-                    condition = true;
-                }
+            	if(this.className){
+            		 var val = getFrom(Silo.scope, this.className+'.'+subject, 'SILO_FALSE');
+            		 if(val != 'SILO_FALSE' && val ==value){
+            			 condition = true;
+            			 return false;
+            		 }
+            	}else{
+            		var val = getFrom(this, subject, 'SILO_FALSE');
+            		if(val !== 'SILO_FALSE'){
+            			condition = (val == value) ? true : false;
+            			return false;
+            		}
+            	}
+               
                 //console.log(ctrl)
                 //console.log(val+ ' : ' + value);
             });
@@ -863,15 +885,13 @@ Silo.View.expressionValue = function(expression, scope){
  */
 Silo.View.renderExpressions = function(html, scope, options){
     return (function(html,scope, options){
-        var pattern = /{{([\w\s;:.,'"!|@#$%^&*()_+\-\[\]]+)}}/g;
+        var pattern = /({)?{{([\w\s;:.,'"!|@#$%^&*()_+\-\[\]]+)}}(})?/g;
         var match = html.match(pattern);
         if(!match) return html;
         for(var a= 0, expression; expression = match[a]; a++){
-        	var rawPattern = / \| raw/;
-        	if(expression.match(rawPattern)){
-        		if(getFrom(options, 'raw') != true) continue;
-        		html = html.replace(expression, expression.replace(rawPattern, ''))
-        		expression = expression.replace(rawPattern,'');
+        	if(expression.match(/^{{{/) && expression.match(/}}}$/)){
+        		html = html.replace(expression, expression.substr(1, expression.length -2))
+        		continue;
         	}
             var expressionValue = Silo.View.expressionValue(expression, scope);
             html = html.replace(expression, expressionValue);
