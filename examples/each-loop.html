@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Silojs Expressions</title>
+		<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
+		<script type="text/javascript" src="../dist/silo.js"></script>
+		<style>[silo-each-root]{display:none;}</style>
+		<script type="text/javascript">
+			var title = "SiloJS IF Statements";
+			var cars = [
+				{make: "Honda", model: "Civic"},
+				{make: "Toyota", model: "Sequoia"},
+				{make: "Nissan", model: "Frontiere"},
+				{make: "Pontiac", model: "Grand AM"}
+			]
+			
+			function dev(e){
+				console.log(this);
+			}
+		</script>
+	</head>
+	
+	<body>
+<xmp>
+	<script>
+		var cars = [
+			{make: "Honda", model: "Civic"},
+			{make: "Toyota", model: "Sequoia"},
+			{make: "Nissan", model: "Frontiere"},
+			{make: "Pontiac", model: "Grand AM"}
+		]		
+	</script>
+	
+	<div silo-each="cars as car" class="{{dev()}}">
+		<h3>{{car.make}}</h3>
+		<p>This is a {{car.make}} {{car.model}}</p>
+	</div>		
+</xmp>
+		
+		<section silo="SiloJs">
+			<div silo-each="cars as car" class="{{dev()}}">
+				<h3>{{car.make}}</h3>
+				<p>This is a {{car.make}} {{car.model}}</p>
+			</div>
+			{{title}}
+		</section>
+		<p>
+			You can use expressions in Silojs encoloded by double {{{variableName}}} brakets.
+		<p>
+	</body>
+</html>

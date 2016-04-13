@@ -1,17 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"> 
 	<head>
 		<title>Silojs Expressions</title>
 		<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
 		<script type="text/javascript" src="../dist/silo.js"></script>
+		<style>[silo-each-root]{display:none;}</style>
 		<script type="text/javascript">
-			var title = "SiloJS Expressions"
+			var title = "MyTitle";
 		</script>
 	</head>
 	
-	<body silo="SiloJS">
-		<h3>{{title}}</h3>
+	<body>
+		<h3>SiloJs If Statements</h3>
+		<section silo="SiloJs">
+			<silo:if title="MyTitle">
+				This is a conditional title
+			</silo:if>
+		</section>
+		
 		<p>
 			You can use expressions in Silojs encoloded by double {{{variableName}}} brakets.
 		<p>
