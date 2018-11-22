@@ -1,0 +1,4 @@
+I want my ${type}, starting with the wife of my ${members.kids.length} kids
+to live well. My oldest child, ${members.kids[0]}, has a strong will.
+My second child, ${members.kids[1]}, has a free and creative spirit.
+My youngest child, ${members.kids[2]}, has a soft loving heart.

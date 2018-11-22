@@ -1,0 +1,34 @@
+{
+  "name": "silojs",
+  "version": "1.0.0",
+  "description": "A lightweight javascript template library",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joshua-williams/silojs.git"
+  },
+  "keywords": [
+    "javascript",
+    "template",
+    "engine"
+  ],
+  "author": "Joshua D. Williams",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/joshua-williams/silojs/issues"
+  },
+  "homepage": "https://github.com/joshua-williams/silojs#readme",
+  "devDependencies": {
+    "@babel/core": "^7.1.2",
+    "@babel/preset-env": "^7.1.0",
+    "babel-loader": "^8.0.4",
+    "jest": "^23.6.0",
+    "webpack": "^4.23.1"
+  }
+}
