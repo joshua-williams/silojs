@@ -4,7 +4,7 @@
   "description": "A lightweight javascript template library",
   "main": "index.js",
   "directories": {
-    "test": "tests"
+    "test": "jest"
   },
   "scripts": {
     "test": "jest"

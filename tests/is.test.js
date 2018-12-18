@@ -2,6 +2,7 @@ const {is} = require('../src/is');
 
 test('is.array should pass given an array', () => {
     expect(is.array([])).toBe(true);
+    expect(is.array(new Array())).toBe(true);
 });
 
 test('is.array should fail given non array object types', () => {

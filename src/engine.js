@@ -25,7 +25,12 @@ class Engine {
 }
 
 class TemplateModel {};
-
+/**
+ *
+ * @param name string required
+ * @param model object required
+ * @returns {TemplateModel}
+ */
 const model = (name, model) => {
   if (!name) {
     throw new Error('Template Model requires a name');
@@ -33,7 +38,10 @@ const model = (name, model) => {
   if (!is.object(model)) {
     throw new Error('Template Model requires model')
   }
+
   var templateModel = new TemplateModel();
+  Object.assign(templateModel, model);
+
   Object.defineProperty(templateModel, 'name', {
     get: function() {
       return name;
@@ -44,7 +52,7 @@ const model = (name, model) => {
       return model
     }
   });
-  Object.assign(templateModel, model);
+
   return templateModel;
 };
 
