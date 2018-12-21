@@ -1,4 +1,4 @@
-const {is} = require('../src/is');
+const is = require('../src/is');
 
 test('is.array should pass given an array', () => {
     expect(is.array([])).toBe(true);
