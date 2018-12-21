@@ -117,7 +117,7 @@ const interpolate = (templateString, ...templateModels) => {
     modelNames.push(templateModels[a].name);
   }
   let fn = new Function(modelNames.join(','), 'return `' + templateString + '`');
-  return fn(...[each,...models], );
+  return fn(...[each,...models] );
 };
 
 const interpolateFile = (templatePath, ...templateModels) => {
