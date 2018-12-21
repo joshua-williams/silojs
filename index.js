@@ -1,2 +1,2 @@
 const silo = require('./src/silo');
-module.exports.silo = silo;
+module.exports = silo;

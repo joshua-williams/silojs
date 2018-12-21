@@ -43,9 +43,13 @@ class Template {
         return interpolate(this.content, ...this.models)
       }
     } catch (e) {
-      this.onRender.forEach((fn) => {
-        fn(e);
-      })
+      if (this.onRender.length) {
+        this.onRender.forEach((fn) => {
+          fn(e);
+        });
+      } else {
+        throw e;
+      }
     }
   }
 
