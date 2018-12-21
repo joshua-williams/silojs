@@ -5,12 +5,10 @@ const is   = require('./is');
 class Template {
 
   constructor(options = {}) {
-    this.path = options.path || false;
-    this.content = options.content || false;
-    this.model = options.model || {};
-  }
-  render() {
-
+    this.name = is.string(options.name) ? options.name : 'tpl';
+    this.path =  is.string(options.path) ? options.path : false;
+    this.content = is.string(options.content) ? options.content : false;
+    this.models = [];
   }
 
   setPath(path) {
@@ -22,9 +20,26 @@ class Template {
     this.content = content;
     return this;
   }
-  setModel(model) {
-    this.model = model;
+
+  addModel(name, data) {
+    this.models.push(model(name, data));
     return this;
+  }
+
+  getModel(name) {
+    for (let a = 0, model; model = this.models[a]; a++) {
+      if (model.name == name) {
+        return model;
+      }
+    }
+  }
+
+  render() {
+    if (this.path) {
+      return interpolateFile(this.path, ...this.models);
+    } else if (this.content) {
+      return interpolate(this.content, ...this.models)
+    }
   }
 }
 

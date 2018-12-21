@@ -73,4 +73,5 @@ const interpolateFile = (templatePath, templateModel) => {
 
 
 module.exports.interpolate = interpolate;
+
 module.exports.model = model;
