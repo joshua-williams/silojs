@@ -9,6 +9,7 @@ class Template {
     this.path =  is.string(options.path) ? options.path : false;
     this.content = is.string(options.content) ? options.content : false;
     this.models = [];
+    this.onRender = [];
   }
 
   setPath(path) {
@@ -35,11 +36,24 @@ class Template {
   }
 
   render() {
-    if (this.path) {
-      return interpolateFile(this.path, ...this.models);
-    } else if (this.content) {
-      return interpolate(this.content, ...this.models)
+    try {
+      if (this.path) {
+        return interpolateFile(this.path, ...this.models);
+      } else if (this.content) {
+        return interpolate(this.content, ...this.models)
+      }
+    } catch (e) {
+      this.onRender.forEach((fn) => {
+        fn(e);
+      })
     }
+  }
+
+  catch (exceptionHandler) {
+    if (is.function(exceptionHandler)) {
+      this.onRender.push(exceptionHandler);
+    }
+    return this;
   }
 }
 

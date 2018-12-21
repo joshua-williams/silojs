@@ -17,14 +17,13 @@ describe('Template class test suite', () => {
 
   test('template should catch a thrown error when rendering file that does not exist', () => {
     let templatePath = path.resolve(__dirname, 'assets/doesNotExist.html');
-    try {
       var html = template()
         .setPath(templatePath)
         .addModel('page', {title: 'Title Test'})
-        .render();
-    } catch (e) {
-      console.log(e.message);
-    }
+        .catch( e => {
+          console.log(e)
+        })
+        .render()
   });
 
 });
