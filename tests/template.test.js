@@ -21,7 +21,7 @@ describe('Template class test suite', () => {
         .setPath(templatePath)
         .addModel('page', {title: 'Title Test'})
         .catch( e => {
-          console.log(e)
+          console.log(e.message)
         })
         .render()
   });

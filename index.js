@@ -1,3 +1,2 @@
-exports.is = require('./src/is');
-exports.engine = require('./src/engine');
-
+const silo = require('./src/silo');
+module.exports.silo = silo;

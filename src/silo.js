@@ -1,6 +1,6 @@
-class Silo {
+const is = require('./is');
+const {template, model} = require('./template');
 
-}
-module.exports = () => {
-  return new Silo();
-}
+exports.is = is;
+exports.model = model;
+exports.template = template;
