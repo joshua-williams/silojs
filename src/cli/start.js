@@ -2,12 +2,12 @@ const { Command } = require('commander');
 const program = new Command();
 
 program
-  .name('create')
-  .description('Create new SiloJs application')
-  .arguments('[name]')
+  .name('start')
+  .description('Start silo application')
+  .arguments('[indexPath]')
   .option('-d, --debug', 'Debug application')
   .action(options => {
-    console.log('creating silo application...')
+    console.log('starting silo application...')
   })
 
 module.exports = program;

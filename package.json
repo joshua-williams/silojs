@@ -4,7 +4,7 @@
   "description": "Javascript Framework for React",
   "main": "index.js",
   "bin": {
-    "silo": "./src/silo-cli.js"
+    "silo": "./src/cli/app.js"
   },
   "scripts": {
     "test": "jest",
