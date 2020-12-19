@@ -1,22 +1,26 @@
 {
   "name": "silojs",
-  "version": "1.0.0",
-  "description": "A lightweight javascript template library",
+  "version": "0.1.0",
+  "description": "Javascript Framework for React",
   "main": "index.js",
-  "directories": {
-    "test": "jest"
+  "bin": {
+    "silo": "./src/silo-cli.js"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "test:unit": "jest unit",
+    "test:integration": "jest integration",
+    "test:coverage": "jest --coverage"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/joshua-williams/silojs.git"
   },
   "keywords": [
-    "javascript",
-    "template",
-    "engine"
+    "reactjs",
+    "react",
+    "framework",
+    "ssr"
   ],
   "author": "Joshua D. Williams",
   "license": "ISC",
@@ -25,10 +29,16 @@
   },
   "homepage": "https://github.com/joshua-williams/silojs#readme",
   "devDependencies": {
-    "@babel/core": "^7.1.2",
-    "@babel/preset-env": "^7.1.0",
-    "babel-loader": "^8.0.4",
-    "jest": "^23.6.0",
-    "webpack": "^4.23.1"
+    "@babel/core": "^7.12.10",
+    "@babel/preset-env": "^7.12.10",
+    "@release-it/conventional-changelog": "^2.0.0",
+    "babel-loader": "^8.2.2",
+    "jest": "^26.6.3",
+    "release-it": "^14.2.2",
+    "webpack": "^5.10.1"
+  },
+  "dependencies": {
+    "-": "0.0.1",
+    "commander": "^6.2.1"
   }
 }
