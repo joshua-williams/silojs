@@ -23,18 +23,18 @@ describe('Router Test Suite', () => {
     });
     it('should get the file extension from url string', () => {
       const url = 'http://wpsite.com/images/logo.png';
-      let ext = router.fileExtension(url);
+      let ext = router.getFileExtension(url);
       expect(ext).toEqual('png');
     });
     it('should get html index from url path', () => {
       const url = '/'
-      const indexPath = router.indexPath(url);
+      const indexPath = router.indexFilePath(url);
       expect(indexPath).not.toBe(false);
       expect(indexPath).toEqual(router.rootDir + '/index.html')
     });
     it('should get jsx index from url path', () => {
       const url = '/shop/products'
-      const indexPath = router.indexPath(url);
+      const indexPath = router.indexFilePath(url);
       expect(indexPath).not.toBe(false);
       expect(indexPath).toEqual(router.rootDir + '/shop/products/index.jsx')
     });
