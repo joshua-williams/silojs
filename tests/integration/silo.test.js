@@ -2,7 +2,7 @@ const express = require('../../src/silo')
 describe('silo.js test suite', () => {
   let app;
   beforeEach(() => {
-    app = silo()
+
 
   })
   it('should render template', () => {
