@@ -1,7 +1,7 @@
 const React = require('react');
 
-module.exports = props => {
+export default function() {
   return (<section>
-    <h1>Shoes</h1>
+    <h1>T-Shirts</h1>
   </section>)
 }

@@ -78,6 +78,9 @@ class Router {
 
   handleRequest(req, res) {
     const file = this.mapUrlToFile(req.url);
+    if (!file) {
+      return this.dispatch(req, res, 'error');
+    }
     if (file.isFile) {
       let cachePath = this.services.cache.exists(req.url);
       if (cachePath) {
@@ -102,7 +105,6 @@ class Router {
         return this.dispatch(req, res, 'error');
       }
     }
-    return this.dispatch(req, res, 'error');
   }
 
   listen(req, res) {
