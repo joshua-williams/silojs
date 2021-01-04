@@ -1,1 +1,0 @@
-const webpack = require('webpack');

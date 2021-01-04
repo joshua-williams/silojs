@@ -7,6 +7,7 @@
     "silo": "./src/cli/app.js"
   },
   "scripts": {
+    "start": "silo start",
     "test": "jest",
     "test:unit": "jest unit",
     "test:integration": "jest integration",
@@ -29,16 +30,19 @@
   },
   "homepage": "https://github.com/joshua-williams/silojs#readme",
   "devDependencies": {
-    "@babel/core": "^7.12.10",
-    "@babel/preset-env": "^7.12.10",
     "@release-it/conventional-changelog": "^2.0.0",
-    "babel-loader": "^8.2.2",
     "jest": "^26.6.3",
-    "release-it": "^14.2.2",
-    "webpack": "^5.10.1"
+    "release-it": "^14.2.2"
   },
   "dependencies": {
     "-": "0.0.1",
-    "commander": "^6.2.1"
+    "@babel/core": "^7.12.10",
+    "@babel/preset-env": "^7.12.11",
+    "@babel/preset-react": "^7.12.10",
+    "babel-loader": "^8.2.2",
+    "commander": "^6.2.1",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "webpack": "^5.11.1"
   }
 }

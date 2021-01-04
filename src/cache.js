@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const util = require('./util');
 
 class Cache {
   constructor(config = {}) {
@@ -16,24 +17,14 @@ class Cache {
   }
 
   makeCacheDirectory() {
-    return new Promise((resolve, reject) => {
-      if (this.cacheDirectoryExists()) {
-        return resolve(true);
-      }
-      if (fs.existsSync(this.path())) {
-        return resolve(true);
-      }
-      fs.mkdir(this.path(), {recursive:true}, (err) => {
-        if (err) {
-          return reject('Failed to create cache directory: ' + this.path() )
-        } else {
-          return resolve(true)
-        }
-      })
-
-    });
+    if (this.cacheDirectoryExists()) {
+      return Promise.resolve(true);
+    }
+    if (fs.existsSync(this.path())) {
+      return Promise.resolve(true);
+    }
+    return util.mkdir(this.path());
   }
-
 
   set(relativePath, content) {
     const filePath = this.path(relativePath);
@@ -70,40 +61,17 @@ class Cache {
         return false;
       }
       if (fs.statSync(filePath).isDirectory()) {
-        return this.removeDir(filePath);
+        return util.removeDir(filePath);
       } else if (fs.statSync(filePath).isFile()) {
         return fs.unlinkSync(filePath);
       }
     } else {
-      return this.removeDir(this.path());
-    }
-  }
-
-  removeDir(path) {
-    if (fs.existsSync(path)) {
-      const files = fs.readdirSync(path)
-
-      if (files.length > 0) {
-        files.forEach(filename => {
-          if (fs.statSync(path + "/" + filename).isDirectory()) {
-            this.removeDir(path + "/" + filename)
-          } else {
-            fs.unlinkSync(path + "/" + filename)
-          }
-        })
-        fs.rmdirSync(path)
-      } else {
-        fs.rmdirSync(path)
-      }
-      return true;
-    } else {
-      return false;
-      console.log("Directory path not found.")
+      return util.removeDir(this.path());
     }
   }
 
   createDirectoryIfNotExists(filePath) {
-    if (this.isDir(filePath)) {
+    if (util.isDir(filePath)) {
       return true;
     }
     fs.mkdirSync(filePath, {recursive: true});
@@ -131,10 +99,6 @@ class Cache {
           resolve(true);
         });
     });
-  }
-
-  isDir(filePath) {
-    return (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory());
   }
 }
 module.exports = Cache;
