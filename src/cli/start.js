@@ -12,8 +12,10 @@ program
   .option('--no-cache[boolean]', 'Disable caching', 'false')
   .option('-d, --debug', 'Debug application')
   .action(() => {
-    const options = {port: program.port};
-    console.log(options)
+    const options = {
+      port: program.port,
+      root: program.root
+    };
     server(options).start();
   })
 

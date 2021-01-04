@@ -1,2 +1,6 @@
-class Request {}
-module.exports = Request;
+module.exports = class Request {
+  constructor() {
+    this.headers = [];
+    this.body = null;
+  }
+}

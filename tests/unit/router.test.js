@@ -1,12 +1,16 @@
 const path = require('path')
 const Router = require('../../src/router');
+const Request = require('../../src/request');
+const Response = require('../../src/response');
 const http = require('http')
 
 describe('Router Test Suite', () => {
-  let router;
+  let router, req, res;
 
   beforeEach(() => {
-    let root = path.join(path.dirname(__dirname), 'sandbox');
+    req = new Request();
+    res = new Response();
+    const root = path.join(path.dirname(__dirname), 'sandbox');
     router = new Router({root});
   });
 
@@ -21,11 +25,6 @@ describe('Router Test Suite', () => {
       let filePath = router.filePath(url);
       expect(filePath).toEqual(router.rootDir + '/shop/clearance.html')
     });
-    it('should get the file extension from url string', () => {
-      const url = 'http://wpsite.com/images/logo.png';
-      let ext = router.getFileExtension(url);
-      expect(ext).toEqual('png');
-    });
     it('should get html index from url path', () => {
       const url = '/'
       const indexPath = router.indexFilePath(url);
@@ -38,5 +37,14 @@ describe('Router Test Suite', () => {
       expect(indexPath).not.toBe(false);
       expect(indexPath).toEqual(router.rootDir + '/shop/products/index.jsx')
     });
+
+    it('should serve html file', () => {
+      const filePath = path.join(router.rootDir, 'shop/clearance.html');
+      spyOn(res, 'send');
+      router.serveFile(req, res, filePath);
+      expect(res.send).toHaveBeenCalled();
+      expect(res.contentType()).toEqual('text/html')
+    });
+
   });
 });

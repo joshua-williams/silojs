@@ -53,3 +53,17 @@ exports.fileNameToComponentName = fileName => {
     .concat(fileName.substr(1));
   return fileName;
 }
+
+/**
+ * @description Gets file extension from url string
+ * @param url {string}
+ * @returns {string|boolean} File extension
+ */
+exports.getFileExtension = (url="") => {
+  url = url.replace(/\?.*$/, '');
+  let match = url.match(/\.(\w+)$/);
+  if (!match) return false;
+  return match[1].toLowerCase();
+}
+
+exports.getFileExt = exports.getFileExtension;

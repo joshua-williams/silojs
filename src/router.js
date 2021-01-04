@@ -3,10 +3,16 @@ const path = require('path');
 const Route = require('./route');
 const Cache = require('./cache');
 const Parser = require('./parser');
+const ContentType = require('./content-type');
+const util = require('./util');
 
 class Router {
   constructor(config = {}) {
-    this.rootDir = config.root || process.cwd();
+    this.config = {
+      ...config,
+      rootDir: path.resolve(config.root) || process.cwd()
+    }
+    this.rootDir = this.config.rootDir;
     this.routes = {
       any: [],
       get: [],
@@ -19,7 +25,7 @@ class Router {
     }
     this.services = {
       cache: new Cache(config),
-      parser: new Parser(config)
+      parser: new Parser(config),
     }
     if (!this.rootDirExists()) {
       throw new Error('root path does not exist or does not have 755 permissions - ' + this.rootDir)
@@ -36,7 +42,6 @@ class Router {
   }
 
   makeRoute(method, callback) {
-    console.log(typeof callback)
     if (typeof callback != 'functionn') {
       throw new Error('route callback must be function');
     }
@@ -82,25 +87,30 @@ class Router {
       return this.dispatch(req, res, 'error');
     }
     if (file.isFile) {
-      let cachePath = this.services.cache.exists(req.url);
-      if (cachePath) {
-        return this.streamFile(req, res, cachePath)
-      }
+
       if (file.ext == 'jsx') {
-        const content = this.services.parser.renderReactComponent(file.path);
+        let cachePath = this.services.cache.exists(req.url);
+        if (cachePath) {
+          console.log('---cachePath')
+          let content = this.services.parser.renderReactComponent(cachePath);
+        } else {
+          console.log('----react component----', file)
+          let content = this.services.parser.renderReactComponent(file.path);
+        }
         if (content) {
+          console.log('------content-----', content)
           const cachePath = this.services.cache.set(file.url, content)
-          return this.streamFile(req, res, cachePath);
+          return this.serveFile(req, res, cachePath);
         } else {
           return this.dispatch(req, res, 'error');
         }
       }
-      return this.streamFile(req, res, file.path);
+      return this.serveFile(req, res, file.path);
     }
     if (file.isDir) {
       let indexPath = this.indexFilePath(file.path);
       if (indexPath) {
-        return this.streamFile(req, res, indexPath)
+        return this.serveFile(req, res, indexPath)
       } else {
         return this.dispatch(req, res, 'error');
       }
@@ -110,25 +120,11 @@ class Router {
   listen(req, res) {
     try {
       this.handleRequest(req, res);
+      res.end();
     } catch (e) {
+      console.log(e)
       this.dispatch(req, res, 'error');
     }
-  }
-
-  /**
-   * @description Gets file extension from url string
-   * @param url {string}
-   * @returns {string|boolean} File extension
-   */
-  getFileExtension(url="") {
-    url = url.replace(/\?.*$/, '');
-    let match = url.match(/\.(\w+)$/);
-    if (!match) return false;
-    return match[1].toLowerCase();
-  }
-
-  getFileExt(url = "") {
-    return this.getFileExtension(url);
   }
 
   /**
@@ -147,11 +143,21 @@ class Router {
   }
   /**
    * @description Gets the index.(html|jsx) file path and checks if it exists
-   * @param uri
+   * @param url
    * @returns {string|boolean} Index file path if exists or false if not.
    */
-  indexFilePath(uri) {
-    let indexPath = path.join(this.rootDir, uri);
+  indexFilePath(url) {
+    let indexPath = path.join(this.rootDir, url);
+    console.log([
+      'url',
+      url,
+      'rootDir',
+      this.rootDir,
+      'indexPath',
+      indexPath,
+      'joined',
+      path.join(this.rootDir, url)
+    ])
     if (fs.existsSync(path.join(indexPath, 'index.jsx'))) {
       return path.join(indexPath, 'index.jsx');
     } else if (fs.existsSync(path.join(indexPath, 'index.html'))) {
@@ -170,18 +176,32 @@ class Router {
   }
 
   mapUrlToFile(url) {
-    let filePath = path.join(this.rootDir, url);
+    let filePath = this.filePath(url) || this.indexFilePath(url) || path.join(this.rootDir, url);
+    if (!filePath) {
+      return false;
+    }
     let stat = fs.statSync(filePath);
+    let ext = util.getFileExt(filePath);
     let file = {
+      ext,
       url,
       path: filePath,
-      isDir: stat.isDirectory(),
-      isFile: stat.isFile()
+      isDir: stat?.isDirectory?.(),
+      isFile: stat?.isFile?.()
     }
-    file.ext = file.isFile ? this.getFileExt(url) : false;
+    return file;
   }
 
-  streamFile(req, res, filePath) {
+  serveFile(req, res, filePath) {
+    let ext = util.getFileExt(filePath);
+    let contentType = ContentType.getByExtension(ext, 'text/plain');
+    let content = fs.readFileSync(filePath, {encoding: 'utf8'});
+    res.setHeader('Content-Type', contentType);
+    console.log(content)
+    res.write(content);
+    res.statusCode = 200;
+    res.end();
+    console.log('file served')
 
   }
 
