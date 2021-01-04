@@ -26,7 +26,6 @@ const util = require('./util')
           component = new Component();
           component = component.render();
         } else {
-          console.log('found it ', Component())
           component = Component();
         }
       } else if (typeof Component == 'object') {

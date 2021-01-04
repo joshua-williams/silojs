@@ -4,11 +4,12 @@ const util = require('./util');
 
 class Cache {
   constructor(config = {}) {
-    this.rootDir = config.root || process.cwd()
+    this.rootDir = path.resolve(config.root) || process.cwd()
     this.siloDir = path.join(this.rootDir, '.silo');
   }
 
   path(subPath = '') {
+    console.log(this.rootDir)
     return path.join(this.rootDir, '.silo', 'cache', subPath);
   }
 
