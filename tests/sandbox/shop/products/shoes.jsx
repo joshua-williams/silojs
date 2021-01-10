@@ -1,6 +1,6 @@
-const React = require('react');
+import React from 'react'
 
-module.exports = props => {
+export default props => {
   return (<section>
     <h1>Shoes</h1>
   </section>)

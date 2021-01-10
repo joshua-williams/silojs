@@ -148,16 +148,6 @@ class Router {
    */
   indexFilePath(url) {
     let indexPath = path.join(this.rootDir, url);
-    console.log([
-      'url',
-      url,
-      'rootDir',
-      this.rootDir,
-      'indexPath',
-      indexPath,
-      'joined',
-      path.join(this.rootDir, url)
-    ])
     if (fs.existsSync(path.join(indexPath, 'index.jsx'))) {
       return path.join(indexPath, 'index.jsx');
     } else if (fs.existsSync(path.join(indexPath, 'index.html'))) {
@@ -197,11 +187,8 @@ class Router {
     let contentType = ContentType.getByExtension(ext, 'text/plain');
     let content = fs.readFileSync(filePath, {encoding: 'utf8'});
     res.setHeader('Content-Type', contentType);
-    console.log(content)
-    res.write(content);
     res.statusCode = 200;
-    res.end();
-    console.log('file served')
+    res.send(content);
 
   }
 

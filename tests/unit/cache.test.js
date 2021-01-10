@@ -24,15 +24,15 @@ describe('Cache Test Suite', () => {
     expect(cache.clear()).toBe(true);
   });
   it('should cache file', () => {
-    let html = '<h1>Silo Test</h1>';
-    let filePath = '/contact/index.html';
+    let html = 'export default props => (<h1>Contact Us</h1>)';
+    let filePath = '/contact/index.jsx';
     cache.set(filePath, html);
     let exists = fs.existsSync(cache.path(filePath));
     expect(exists).toBe(true)
   });
   it('should get contents of cached file', () => {
-    let content = cache.get('/contact/index.html');
-    let html = '<h1>Silo Test</h1>';
+    let content = cache.get('/contact/index.jsx');
+    let html = 'export default props => (<h1>Contact Us</h1>)';
     expect(content.toString()).toEqual(html)
   })
   it('should clear cache of single file', () => {
