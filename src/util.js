@@ -40,6 +40,11 @@ exports.mkdir = (dirPath) => {
   });
 }
 
+/**
+ * @description Camel-cases baseName of filename. eg: about-our_company.jsx -> AboutOurCompany
+ * @param fileName
+ * @returns {string}
+ */
 exports.fileNameToComponentName = fileName => {
   fileName = path.basename(fileName)
     .toLowerCase()

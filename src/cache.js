@@ -4,12 +4,11 @@ const util = require('./util');
 
 class Cache {
   constructor(config = {}) {
-    this.rootDir = path.resolve(config.root) || process.cwd()
+    this.rootDir = config.root && path.resolve(config.root) || process.cwd()
     this.siloDir = path.join(this.rootDir, '.silo');
   }
 
   path(subPath = '') {
-    console.log(this.rootDir)
     return path.join(this.rootDir, '.silo', 'cache', subPath);
   }
 
@@ -64,7 +63,8 @@ class Cache {
       if (fs.statSync(filePath).isDirectory()) {
         return util.removeDir(filePath);
       } else if (fs.statSync(filePath).isFile()) {
-        return fs.unlinkSync(filePath);
+        fs.unlinkSync(filePath);
+        return fs.existsSync(filePath) ? false : true;
       }
     } else {
       return util.removeDir(this.path());
@@ -84,22 +84,11 @@ class Cache {
   }
 
   writeFile(filePath, content) {
+    if (typeof content !== 'string') {
+      throw new Error('Can not write file @ ' + filePath);
+    }
     fs.writeFileSync(filePath, content)
     return fs.existsSync(filePath);
-
-    return new Promise((resolve, reject) => {
-
-
-      const stream = fs.createWriteStream(filePath, {emitClose: true})
-        .once('open', fd => {
-          stream.write(content);
-          stream.end();
-        })
-        .close(data => {
-          console.log('cache created ' + filePath);
-          resolve(true);
-        });
-    });
   }
 }
 module.exports = Cache;

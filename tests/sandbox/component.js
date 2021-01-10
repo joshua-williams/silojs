@@ -1,0 +1,1 @@
+const c = require('/Users/joshua/git/silojs/tests/sandbox/.silo/cache/shop/products/shoes.jsx');
