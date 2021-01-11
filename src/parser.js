@@ -40,14 +40,14 @@ const util = require('./util')
 
     bundleReactComponent(componentPath) {
       const relativePath = componentPath.replace(this.rootDir, '');
-      const componentCachePath = this.services.cache.path(relativePath);
+      const bundlePath = path.join(this.rootDir, '.silo/bundles', relativePath);
       const library = path.basename(componentPath.replace(/\.\w+$/, ''));
       const config = {
         target: "node",
         mode: "development",
         entry: componentPath,
         output: {
-          path: path.dirname(componentCachePath),
+          path: path.dirname(bundlePath),
           filename: path.basename(componentPath),
           library,
           libraryTarget: 'umd',
@@ -81,5 +81,13 @@ const util = require('./util')
           resolve(true);
         });
       });
+    }
+    bundlePath(subPath) {
+      let bundlePath = path.resolve(this.rootDir);
+      if (subPath && typeof subPath === 'string') {
+        return path.join(bundlePath, subPath);
+      } else {
+        return path.join(this.rootDir, 'bundles');
+      }
     }
  }

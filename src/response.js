@@ -11,6 +11,10 @@ module.exports = class Response {
     return this;
   }
 
+  setBody(content) {
+    this.body = content;
+  }
+
   contentType(contentType = false) {
     if (contentType === false) {
       return this.headers['Content-Type']

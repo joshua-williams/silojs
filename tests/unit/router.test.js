@@ -37,7 +37,6 @@ describe('Router Test Suite', () => {
       expect(indexPath).not.toBe(false);
       expect(indexPath).toEqual(router.rootDir + '/shop/products/index.jsx')
     });
-
     it('should serve html file', () => {
       const filePath = path.join(router.rootDir, 'shop/clearance.html');
       spyOn(res, 'send');
@@ -45,6 +44,23 @@ describe('Router Test Suite', () => {
       expect(res.send).toHaveBeenCalled();
       expect(res.contentType()).toEqual('text/html')
     });
+  });
 
+  describe('Handle Request', () => {
+    it('should serve html content', () => {
+      req.url = '/shop/clearance'
+      return router.handleRequest(req, res)
+        .then(() => {
+          expect(res.body).toBeTruthy()
+        })
+    });
+
+    it('should serve react component', () => {
+      req.url = '/shop/products/shoes';
+      return router.handleRequest(req, res)
+        .then(() => {
+          expect(res.body).toBeTruthy()
+        })
+    });
   });
 });

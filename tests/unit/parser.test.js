@@ -16,7 +16,7 @@ describe('Parser Test Suite', () => {
 
     it('should bundle react component', () => {
       let componentPath = path.join(rootDir, 'shop/products/perfume.jsx');
-      let cachePath = cache.path('shop/products/perfume.jsx');
+      let cachePath = parser.bundlePath('shop/products/perfume.jsx');
       return parser.bundleReactComponent(componentPath)
         .finally(() => {
           expect(fs.existsSync(cachePath)).toBe(true);
@@ -48,7 +48,6 @@ describe('Parser Test Suite', () => {
       expect(content).toBeTruthy();
     });
 
-
     describe('import rendered component', () => {
       beforeAll(() => {
         let paths = [
@@ -61,23 +60,23 @@ describe('Parser Test Suite', () => {
       });
 
       it('should import rendered react component from commonjs default export', () => {
-        let componentPath = cache.path('shop/products/perfume.jsx');
+        let componentPath = parser.bundlePath('shop/products/perfume.jsx');
         let component = require(componentPath);
         expect(component).toBeInstanceOf(Function)
       });
 
       it('should import rendered react component from commonjs named export', () => {
-        let componentPath = cache.path('shop/products/t-shirts.jsx');
+        let componentPath = parser.bundlePath('shop/products/t-shirts.jsx');
         let {TShirts} = require(componentPath);
         expect(TShirts).toBeInstanceOf(Function)
       });
       it('should import rendered react component from es6 default export', () => {
-        let componentPath = cache.path('shop/products/shoes.jsx');
+        let componentPath = parser.bundlePath('shop/products/shoes.jsx');
         let component = parser.loadComponent(componentPath);
         expect(component).toBeInstanceOf(Function)
       });
       it('should import rendered react component from es6 named export', () => {
-        let componentPath = cache.path('shop/products/shoes.jsx');
+        let componentPath = parser.bundlePath('shop/products/shoes.jsx');
         let component = parser.loadComponent(componentPath)
         expect(component).toBeInstanceOf(Function)
       });
