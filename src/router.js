@@ -12,8 +12,6 @@ class Router {
   constructor(config = {}) {
     this.req = null;
     this.res = null;
-    this.request = new Request();
-    this.response = new Response();
     this.config = {
       ...config,
       rootDir: path.resolve(config.root) || process.cwd()
@@ -88,17 +86,21 @@ class Router {
   }
 
   handleRequest(req, res) {
-    const file = this.mapUrlToFile(req.url);
-    if (!file) {
-      this.dispatch(req, res, 'error');
-      return Promise.reject('Route not found ', req,)
+    this.req = new Request(req);
+    this.res = new Response(res);
+    const file = this.mapUrlToFile(this.req.url);
+
+    if (!file?.isFile) {
+      this.res.statusCode = 404;
+      this.res.end("page not found");
+      return this.res;
+      return Promise.reject('Route not found ')
     }
     if (file.ext == 'jsx') {
-      console.log('is jsx')
-      let cachePath = this.services.cache.exists(req.url);
+      let cachePath = this.services.cache.exists(this.req.url);
       if (cachePath) {
         console.log('serving cache @', cachePath);
-        return this.serveFile(req, res, cachePath);
+        return this.serveFile(this.req, this.res, cachePath);
       } else {
         console.log('bundling react component')
         return this.services.parser.bundleReactComponent(file.path)
@@ -114,19 +116,20 @@ class Router {
           });
       }
     }
-    return this.serveFile(req, res, file.path);
+    return this.serveFile(this.req, this.res, file.path);
   }
 
   listen(req, res) {
-    this.req = req;
-    this.res = res;
+    this.req = new Request(req);
+    this.res = new Response(res);
 
     try {
-      this.handleRequest(this.request, this.response);
+      this.handleRequest(this.req, this.res);
     } catch (e) {
       console.log('there was an error \n', e)
       this.dispatch(req, res, 'error');
     }
+
   }
 
   /**
@@ -151,8 +154,10 @@ class Router {
   indexFilePath(url) {
     let indexPath = path.join(this.rootDir, url);
     if (fs.existsSync(path.join(indexPath, 'index.jsx'))) {
+      console.log('---found index jsx path---', indexPath)
       return path.join(indexPath, 'index.jsx');
     } else if (fs.existsSync(path.join(indexPath, 'index.html'))) {
+      console.log('---found index html path---', indexPath, ' ', url)
       return path.join(indexPath, 'index.html');
     } else {
       return false;
@@ -167,9 +172,9 @@ class Router {
     }
   }
 
-  mapUrlToFile(url) {
+  mapUrlToFile(url = '/') {
     let filePath = this.filePath(url) || this.indexFilePath(url) || path.resolve(this.rootDir, url);
-    if (!filePath) {
+    if (!fs.existsSync(filePath)) {
       return false;
     }
     let stat = fs.statSync(filePath);
@@ -185,15 +190,14 @@ class Router {
   }
 
   serveFile(req, res, filePath) {
+    console.log('serveFile(,,filePath) ', filePath)
     return new Promise(resolve => {
       let ext = util.getFileExt(filePath);
       let contentType = ContentType.getByExtension(ext, 'text/html');
       let content = fs.readFileSync(filePath, {encoding: 'utf8'});
       res.setHeader('Content-Type', contentType);
-      res.setBody(content);
       res.statusCode = 200;
-      res.send(content);
-      res.end();
+      res.end(content);
       resolve({req, res})
     });
   }

@@ -63,4 +63,11 @@ describe('Router Test Suite', () => {
         })
     });
   });
+  describe('Handle 404', () => {
+    it('should send 404 response', () => {
+      let path = '/path/not/found'
+      router.handleRequest(req, res);
+      expect(res.statusCode).toBe(404);
+    })
+  })
 });
