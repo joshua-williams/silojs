@@ -44,7 +44,7 @@ class Cache {
   }
   exists(relativePath) {
     let filePath = this.path(relativePath);
-    return fs.existsSync(filePath) ? filePath : false;
+    return fs.existsSync(filePath) && fs.statSync(filePath).isFile() && filePath;
   }
   get(relativePath) {
     if (this.exists(relativePath)) {

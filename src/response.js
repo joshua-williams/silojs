@@ -1,14 +1,21 @@
 module.exports = class Response {
-  constructor() {
+  constructor(response = null) {
+    this._res = response;
     this.headers = {
       'Content-Type': 'text/plain'
     };
     this.body = '';
   }
-
+  set statusCode(value) {
+    this._res.statusCode = value;
+  }
   setHeader(name, value) {
-    this.headers[name] = value;
+    this._res.setHeader(name, value);
     return this;
+  }
+
+  setBody(content) {
+    this.body = content;
   }
 
   contentType(contentType = false) {
@@ -21,8 +28,8 @@ module.exports = class Response {
   setContentType(contentType) {
     this.headers['Content-Type'] = contentType;
   }
-  send(content) {
-
+  end(content) {
+    this._res.end(content)
   }
   sendHtml(html) {
     this.setContentType('text/html');

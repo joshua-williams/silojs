@@ -1,6 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 const Route = require('./route');
+const Request = require('./request');
+const Response = require('./response');
 const Cache = require('./cache');
 const Parser = require('./parser');
 const ContentType = require('./content-type');
@@ -8,6 +10,8 @@ const util = require('./util');
 
 class Router {
   constructor(config = {}) {
+    this.req = null;
+    this.res = null;
     this.config = {
       ...config,
       rootDir: path.resolve(config.root) || process.cwd()
@@ -82,49 +86,43 @@ class Router {
   }
 
   handleRequest(req, res) {
-    const file = this.mapUrlToFile(req.url);
-    if (!file) {
-      return this.dispatch(req, res, 'error');
-    }
-    if (file.isFile) {
+    this.req = new Request(req);
+    this.res = new Response(res);
+    const file = this.mapUrlToFile(this.req.url);
 
-      if (file.ext == 'jsx') {
-        let cachePath = this.services.cache.exists(req.url);
-        if (cachePath) {
-          console.log('---cachePath')
-          let content = this.services.parser.renderReactComponent(cachePath);
-        } else {
-          console.log('----react component----', file)
-          let content = this.services.parser.renderReactComponent(file.path);
-        }
-        if (content) {
-          console.log('------content-----', content)
-          const cachePath = this.services.cache.set(file.url, content)
-          return this.serveFile(req, res, cachePath);
-        } else {
-          return this.dispatch(req, res, 'error');
-        }
-      }
-      return this.serveFile(req, res, file.path);
+    if (!file?.isFile) {
+      this.res.statusCode = 404;
+      this.res.end("page not found");
+      return Promise.reject('Route not found ')
     }
-    if (file.isDir) {
-      let indexPath = this.indexFilePath(file.path);
-      if (indexPath) {
-        return this.serveFile(req, res, indexPath)
+    if (file.ext == 'jsx') {
+      let cachePath = this.services.cache.exists(this.req.url);
+      if (cachePath) {
+        console.log('serving cache @', cachePath);
+        return this.serveFile(this.req, this.res, cachePath);
       } else {
-        return this.dispatch(req, res, 'error');
+        return this.services.parser.bundleReactComponent(file.path)
+          .then(bundlePath => {
+            let content = this.services.parser.renderReactComponent(bundlePath);
+            let cachePath = this.services.cache.path(file.url);
+            return this.serveFile(req, res, cachePath);
+          });
       }
     }
+    return this.serveFile(this.req, this.res, file.path);
   }
 
   listen(req, res) {
+    this.req = new Request(req);
+    this.res = new Response(res);
+
     try {
-      this.handleRequest(req, res);
-      res.end();
+      this.handleRequest(this.req, this.res);
     } catch (e) {
-      console.log(e)
+      console.log('there was an error \n', e)
       this.dispatch(req, res, 'error');
     }
+
   }
 
   /**
@@ -165,9 +163,9 @@ class Router {
     }
   }
 
-  mapUrlToFile(url) {
-    let filePath = this.filePath(url) || this.indexFilePath(url) || path.join(this.rootDir, url);
-    if (!filePath) {
+  mapUrlToFile(url = '/') {
+    let filePath = this.filePath(url) || this.indexFilePath(url) || path.resolve(this.rootDir, url);
+    if (!fs.existsSync(filePath)) {
       return false;
     }
     let stat = fs.statSync(filePath);
@@ -183,13 +181,16 @@ class Router {
   }
 
   serveFile(req, res, filePath) {
-    let ext = util.getFileExt(filePath);
-    let contentType = ContentType.getByExtension(ext, 'text/plain');
-    let content = fs.readFileSync(filePath, {encoding: 'utf8'});
-    res.setHeader('Content-Type', contentType);
-    res.statusCode = 200;
-    res.send(content);
-
+    console.log('serveFile(,,filePath) ', filePath)
+    return new Promise(resolve => {
+      let ext = util.getFileExt(filePath);
+      let contentType = ContentType.getByExtension(ext, 'text/html');
+      let content = fs.readFileSync(filePath, {encoding: 'utf8'});
+      res.setHeader('Content-Type', contentType);
+      res.statusCode = 200;
+      res.end(content);
+      resolve({req, res})
+    });
   }
 
   streamCache(req, res) {
