@@ -3,6 +3,7 @@ const path = require('path');
 const Parser = require('../../src/parser');
 const Cache = require('../../src/cache');
 const rootDir = path.join(path.dirname(__dirname), 'sandbox')
+const ReactDomServer = require('react-dom/server');
 
 describe('Parser Test Suite', () => {
   let parser = null;
@@ -16,10 +17,10 @@ describe('Parser Test Suite', () => {
 
     it('should bundle react component', () => {
       let componentPath = path.join(rootDir, 'shop/products/perfume.jsx');
-      let cachePath = parser.bundlePath('shop/products/perfume.jsx');
+      let bundlePath = parser.bundlePath('shop/products/perfume.jsx');
       return parser.bundleReactComponent(componentPath)
         .finally(() => {
-          expect(fs.existsSync(cachePath)).toBe(true);
+          expect(fs.existsSync(bundlePath)).toBe(true);
         });
     });
 
@@ -53,23 +54,31 @@ describe('Parser Test Suite', () => {
         let paths = [
           path.join(rootDir, '/shop/products/perfume.jsx'),
           path.join(rootDir, 'shop/products/shoes.jsx'),
-          path.join(rootDir, 'shop/products/t-shirts.jsx')
+          path.join(rootDir, 'shop/products/t-shirts.jsx'),
+          path.join(rootDir, 'shop/products/specials.jsx')
         ]
         let promises = paths.map(path => parser.bundleReactComponent(path))
         return Promise.all(promises)
       });
-
-      it('should import rendered react component from commonjs default export', () => {
-        let componentPath = parser.bundlePath('shop/products/perfume.jsx');
-        let component = require(componentPath);
-        expect(component).toBeInstanceOf(Function)
+      describe('import commonjs modules', () => {
+        it('should import rendered react component from commonjs default export', () => {
+          let componentPath = parser.bundlePath('shop/products/perfume.jsx');
+          let component = require(componentPath);
+          expect(component).toBeInstanceOf(Function)
+        });
+        it('should import rendered react component from commonjs named export', () => {
+          let componentPath = parser.bundlePath('shop/products/t-shirts.jsx');
+          let {TShirts} = require(componentPath);
+          expect(TShirts).toBeInstanceOf(Function)
+        });
+        it('should import rendered react component from commonjs and es6 syntax', () => {
+          let componentPath = parser.bundlePath('shop/specials.jsx');
+          let {Specials} = require(componentPath);
+          const html = ReactDomServer.renderToString(Specials)
+          expect(Specials).toBeInstanceOf(Function)
+        });
       });
 
-      it('should import rendered react component from commonjs named export', () => {
-        let componentPath = parser.bundlePath('shop/products/t-shirts.jsx');
-        let {TShirts} = require(componentPath);
-        expect(TShirts).toBeInstanceOf(Function)
-      });
       it('should import rendered react component from es6 default export', () => {
         let componentPath = parser.bundlePath('shop/products/shoes.jsx');
         let component = parser.loadComponent(componentPath);

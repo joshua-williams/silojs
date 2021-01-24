@@ -33,15 +33,18 @@ const util = require('./util')
         } else {
           component = Component();
         }
+      } else {
+        console.log('--typeof component----',  Component)
       }
       const content = ReactDomServer.renderToString(component);
+      console.log('-----react content------', content, component)
       return content;
      }
 
     bundleReactComponent(componentPath) {
       const relativePath = componentPath.replace(this.rootDir, '');
       const bundlePath = path.join(this.rootDir, '.silo/bundles', relativePath);
-      const library = path.basename(componentPath.replace(/\.\w+$/, ''));
+      const library = util.fileNameToComponentName(componentPath)
       const config = {
         target: "node",
         mode: "development",
@@ -78,16 +81,16 @@ const util = require('./util')
             colors: true
           }));
          */
-          resolve(true);
+          resolve(bundlePath);
         });
       });
     }
     bundlePath(subPath) {
-      let bundlePath = path.resolve(this.rootDir);
+      let bundlePath = path.resolve(this.rootDir, '.silo/bundles');
       if (subPath && typeof subPath === 'string') {
         return path.join(bundlePath, subPath);
       } else {
-        return path.join(this.rootDir, 'bundles');
+        return bundlePath
       }
     }
  }

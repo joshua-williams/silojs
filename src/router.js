@@ -93,7 +93,6 @@ class Router {
     if (!file?.isFile) {
       this.res.statusCode = 404;
       this.res.end("page not found");
-      return this.res;
       return Promise.reject('Route not found ')
     }
     if (file.ext == 'jsx') {
@@ -102,16 +101,10 @@ class Router {
         console.log('serving cache @', cachePath);
         return this.serveFile(this.req, this.res, cachePath);
       } else {
-        console.log('bundling react component')
         return this.services.parser.bundleReactComponent(file.path)
-          .then(() => {
-            let componentPath = this.services.parser.bundlePath(file.url);
-            console.log('rendering react component');
-            let content = this.services.parser.renderReactComponent(componentPath);
-            console.log('caching react component')
-            let cached = this.services.cache.set(file.url, content);
+          .then(bundlePath => {
+            let content = this.services.parser.renderReactComponent(bundlePath);
             let cachePath = this.services.cache.path(file.url);
-            console.log('serving content');
             return this.serveFile(req, res, cachePath);
           });
       }
@@ -154,10 +147,8 @@ class Router {
   indexFilePath(url) {
     let indexPath = path.join(this.rootDir, url);
     if (fs.existsSync(path.join(indexPath, 'index.jsx'))) {
-      console.log('---found index jsx path---', indexPath)
       return path.join(indexPath, 'index.jsx');
     } else if (fs.existsSync(path.join(indexPath, 'index.html'))) {
-      console.log('---found index html path---', indexPath, ' ', url)
       return path.join(indexPath, 'index.html');
     } else {
       return false;
