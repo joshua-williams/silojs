@@ -1,10 +1,10 @@
 {
-  "name": "silojs",
+  "name": "@joshua-williams/silojs",
   "version": "0.1.0",
   "description": "Javascript Framework for React",
   "main": "index.js",
   "bin": {
-    "silo": "./src/cli/app.js"
+    "silo": "src/cli/app.js"
   },
   "scripts": {
     "start": "silo start",
@@ -16,6 +16,9 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/joshua-williams/silojs.git"
+  },
+  "publishConfig": {
+    "registry":"https://npm.pkg.github.com"
   },
   "keywords": [
     "reactjs",
@@ -44,5 +47,8 @@
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "webpack": "^5.11.1"
+  },
+  "directories": {
+    "test": "tests"
   }
 }
