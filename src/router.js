@@ -101,11 +101,22 @@ class Router {
         console.log('serving cache @', cachePath);
         return this.serveFile(this.req, this.res, cachePath);
       } else {
+        console.log('bundling react component...')
         return this.services.parser.bundleReactComponent(file.path)
           .then(bundlePath => {
             let content = this.services.parser.renderReactComponent(bundlePath);
+            console.log('caching rendered component...')
+            if (!this.services.cache.set(file.url, content)) {
+              throw new Error('Failed to cache rendered component ', bundlePath)
+            }
             let cachePath = this.services.cache.path(file.url);
-            return this.serveFile(req, res, cachePath);
+            return this.serveFile(req, res, cachePath)
+              .catch(e => {
+                console.log('failed to serve file ', cachePath)
+              })
+          })
+          .catch(e => {
+            console.log('---failed to bundle react component---', e)
           });
       }
     }
