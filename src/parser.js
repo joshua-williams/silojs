@@ -75,12 +75,6 @@ const util = require('./util')
             console.log('error: ', err);
             return reject(false);
           }
-          /*
-          console.log(stats.toString({
-            chunks: false,
-            colors: true
-          }));
-         */
           resolve(bundlePath);
         });
       });
