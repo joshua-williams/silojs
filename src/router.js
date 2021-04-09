@@ -14,7 +14,7 @@ class Router {
     this.res = null;
     this.config = {
       ...config,
-      rootDir: path.resolve(config.root) || process.cwd()
+      rootDir: path.resolve(config.root|| process.cwd())
     }
     this.rootDir = this.config.rootDir;
     this.routes = {

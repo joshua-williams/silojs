@@ -1,2 +1,2 @@
-const silo = require('./src/silo');
-module.exports = silo;
+export const Route = require('./src/route');
+export const Router = require('./src/router');
