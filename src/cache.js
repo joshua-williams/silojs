@@ -6,6 +6,9 @@ class Cache {
   constructor(config = {}) {
     this.rootDir = config.root && path.resolve(config.root) || process.cwd()
     this.siloDir = path.join(this.rootDir, '.silo');
+    if (!fs.existsSync(this.path())) {
+      util.mkdir(this.path())
+    }
   }
 
   path(subPath = '') {
@@ -26,8 +29,12 @@ class Cache {
     return util.mkdir(this.path());
   }
 
-  set(relativePath, content) {
-    const filePath = this.path(relativePath);
+  set(file, content) {
+    let filePath = this.path(file.url);
+    if (file.url == '/') {
+      filePath = this.path('index.html')
+      console.log('--filepath--', filePath);
+    }
     if (fs.existsSync(filePath)) {
       this.clear(filePath);
     }
@@ -47,6 +54,10 @@ class Cache {
     return fs.existsSync(filePath) && fs.statSync(filePath).isFile() && filePath;
   }
   get(relativePath) {
+    if (relativePath == '/') {
+      relativePath = 'index.html';
+      console.log('getting..', relativePath)
+    }
     if (this.exists(relativePath)) {
       return fs.readFileSync(this.path(relativePath));
     } else {

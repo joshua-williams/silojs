@@ -95,6 +95,7 @@ class Router {
       this.res.end("page not found");
       return Promise.reject('Route not found ')
     }
+    console.log('----file----', file);
     if (file.ext == 'jsx') {
       let cachePath = this.services.cache.exists(this.req.url);
       if (cachePath) {
@@ -105,11 +106,10 @@ class Router {
         return this.services.parser.bundleReactComponent(file.path)
           .then(bundlePath => {
             let content = this.services.parser.renderReactComponent(bundlePath);
-            console.log('caching rendered component...')
-            if (!this.services.cache.set(file.url, content)) {
+            if (!this.services.cache.set(file, content)) {
               throw new Error('Failed to cache rendered component ', bundlePath)
             }
-            let cachePath = this.services.cache.path(file.url);
+            let cachePath = this.services.cache.path(file.url == '/' ? 'index.html' : file.url);
             return this.serveFile(req, res, cachePath)
               .catch(e => {
                 console.log('failed to serve file ', cachePath)
