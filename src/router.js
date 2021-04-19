@@ -192,7 +192,7 @@ class Router {
   }
 
   serveFile(req, res, filePath) {
-    console.log('serveFile(,,filePath) ', filePath)
+    console.log('serving file ', filePath)
     return new Promise(resolve => {
       let ext = util.getFileExt(filePath);
       let contentType = ContentType.getByExtension(ext, 'text/html');

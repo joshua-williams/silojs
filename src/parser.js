@@ -16,7 +16,13 @@ const util = require('./util')
 
     loadComponent(componentPath) {
       const ComponentName = util.fileNameToComponentName(componentPath);
-      const Module = require(componentPath);
+      let Module;
+      try {
+        Module = require(componentPath);
+      } catch (e) {
+        console.error(`failed to load module (${ComponentName} @ ${componentPath})\n`, e)
+        process.exit(1);
+      }
       const Component = Module[ComponentName] || Module;
       return  Component?.default ?? Component;
     }
@@ -37,7 +43,6 @@ const util = require('./util')
         console.log('--typeof component----',  Component)
       }
       const content = ReactDomServer.renderToString(component);
-      console.log('-----react content------', content, component)
       return content;
      }
 
@@ -65,6 +70,12 @@ const util = require('./util')
                 options: babelConfig
               }
             }
+          ]
+        },
+        resolve: {
+          modules: [
+            'node_modules',
+            this.rootDir
           ]
         }
       }

@@ -33,7 +33,6 @@ class Cache {
     let filePath = this.path(file.url);
     if (file.url == '/') {
       filePath = this.path('index.html')
-      console.log('--filepath--', filePath);
     }
     if (fs.existsSync(filePath)) {
       this.clear(filePath);

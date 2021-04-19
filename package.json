@@ -1,6 +1,6 @@
 {
-  "name": "@joshua-williams/silojs",
-  "version": "0.1.13",
+  "name": "silojs",
+  "version": "0.1.15",
   "description": "Javascript Framework for React",
   "main": "index.js",
   "bin": {
